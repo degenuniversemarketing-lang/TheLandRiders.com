@@ -1,0 +1,4277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE LAND RIDERS | Muzaffarabad Ride Service</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* ========== ROOT VARIABLES ========== */
+        :root {
+            --primary: #2E7D32;
+            --secondary: #FFD600;
+            --accent: #1B5E20;
+            --light: #FFFFFF;
+            --dark: #212121;
+            --gray: #757575;
+            --light-gray: #F5F5F5;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F44336;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        /* ========== RESET & BASE STYLES ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== LOADING SCREEN ========== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-logo {
+            font-size: 3rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== WELCOME SCREEN ========== */
+        .welcome-screen {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            padding: 20px;
+        }
+
+        .welcome-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding-top: 60px;
+            text-align: center;
+        }
+
+        .brand-logo {
+            font-size: 3.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .brand-name {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, var(--light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .welcome-title {
+            color: white;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .welcome-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+            line-height: 1.6;
+        }
+
+        .welcome-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-lg {
+            padding: 20px 35px;
+            font-size: 1.2rem;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: var(--dark);
+            box-shadow: 0 4px 15px rgba(255, 214, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #FFC107;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 214, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+            border-color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #388E3C;
+            transform: translateY(-3px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #D32F2F;
+            transform: translateY(-3px);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            transform: translateY(-3px);
+        }
+
+        .btn-call {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-call:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        /* ========== AUTH CONTAINERS ========== */
+        .auth-container {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            padding: 20px;
+            position: relative;
+        }
+
+        .auth-back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .auth-box {
+            background: var(--light);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            margin: 80px auto 20px;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .auth-header p {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        /* ========== FORM STEPS ========== */
+        .form-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .form-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--light-gray);
+            z-index: 1;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--gray);
+            position: relative;
+            z-index: 2;
+            transition: var(--transition);
+        }
+
+        .step.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+            transform: scale(1.1);
+        }
+
+        .step.completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== FORM ELEMENTS ========== */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--light);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--danger);
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 8px;
+            display: block;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .success-message {
+            color: var(--success);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ========== DASHBOARDS ========== */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: var(--light-gray);
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--light);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            color: var(--secondary);
+            font-size: 1.8rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .notification-badge {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* ========== CUSTOMER DASHBOARD ========== */
+        .booking-panel {
+            width: 450px;
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        @media (max-width: 1100px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .booking-panel {
+                width: 100%;
+                position: static;
+            }
+        }
+
+        .booking-section {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .booking-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .booking-section h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ========== LOCATION INPUTS ========== */
+        .location-inputs {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .location-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .location-input i {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        .location-input input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .location-input input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .location-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        /* ========== MAP CONTAINER ========== */
+        .map-container {
+            flex: 1;
+            background: var(--light);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            min-height: 600px;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        /* ========== VEHICLE SELECTION ========== */
+        .vehicle-selection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .vehicle-option {
+            text-align: center;
+            padding: 25px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--light);
+        }
+
+        .vehicle-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(46, 125, 50, 0.1);
+        }
+
+        .vehicle-option.active {
+            border-color: var(--primary);
+            background: rgba(46, 125, 50, 0.05);
+            box-shadow: 0 5px 20px rgba(46, 125, 50, 0.15);
+        }
+
+        .vehicle-option i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .vehicle-name {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .vehicle-price {
+            font-size: 0.9rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* ========== OFFERS & REQUESTS ========== */
+        .offers-container, .requests-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .offer-card, .request-card {
+            background: var(--light);
+            border: 2px solid var(--light-gray);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .offer-card:hover, .request-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.1);
+        }
+
+        .offer-card.selected {
+            border-color: var(--success);
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .offer-header, .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .rider-info, .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rider-avatar, .customer-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .customer-avatar {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .rating-stars i {
+            color: #FFD600;
+            font-size: 0.9rem;
+        }
+
+        .offer-price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .offer-details, .request-details {
+            margin-bottom: 15px;
+        }
+
+        .offer-details p, .request-details p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .offer-details i, .request-details i {
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        /* ========== ACTIVE RIDE ========== */
+        .active-ride-section {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        .ride-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .ride-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .ride-info-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .ride-info-item small {
+            display: block;
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .ride-info-item div {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* ========== RIDER DASHBOARD ========== */
+        .rider-panel {
+            width: 450px;
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.3);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--secondary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* ========== LIVE LOCATION SECTION ========== */
+        .live-location-section {
+            background: var(--light);
+            border: 2px solid var(--light-gray);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .location-share {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .location-share input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        .location-share input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .share-duration {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .duration-btn {
+            padding: 12px;
+            background: var(--light-gray);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .duration-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+
+        /* ========== ADMIN DASHBOARD ========== */
+        .admin-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--light);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* ========== ADMIN SECTIONS ========== */
+        .admin-section {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .admin-section h3 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+
+        .admin-table th {
+            background: var(--light-gray);
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .admin-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid var(--light-gray);
+            vertical-align: middle;
+        }
+
+        .admin-table tr:hover {
+            background: rgba(46, 125, 50, 0.02);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ========== WHATSAPP SECTION ========== */
+        .whatsapp-section {
+            background: rgba(37, 211, 102, 0.1);
+            border: 2px solid #25D366;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .whatsapp-section h4 {
+            color: #128C7E;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 1.3rem;
+        }
+
+        .contact-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .contact-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: white;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: var(--transition);
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .contact-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .contact-option.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .contact-option.call {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ========== MODALS ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--light);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        /* ========== COMPLAIN FORM ========== */
+        .complain-form {
+            background: var(--light-gray);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .rating-input {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0 25px;
+            justify-content: center;
+        }
+
+        .rating-star {
+            font-size: 2rem;
+            color: var(--light-gray);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .rating-star.active {
+            color: #FFD600;
+            transform: scale(1.1);
+        }
+
+        /* ========== TOAST NOTIFICATIONS ========== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--dark);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 3000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.warning {
+            background: var(--warning);
+        }
+
+        .toast.info {
+            background: var(--primary);
+        }
+
+        /* ========== RESPONSIVE DESIGN ========== */
+        @media (max-width: 768px) {
+            .brand-name {
+                font-size: 2rem;
+            }
+            
+            .welcome-title {
+                font-size: 1.8rem;
+            }
+            
+            .auth-box {
+                padding: 30px 20px;
+                margin: 60px auto 20px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .vehicle-selection {
+                grid-template-columns: 1fr;
+            }
+            
+            .location-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-options {
+                flex-direction: column;
+            }
+            
+            .contact-option {
+                min-width: 100%;
+            }
+            
+            .admin-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .toast {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+        }
+
+        /* ========== STATUS INDICATORS ========== */
+        .status-online {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .status-offline {
+            background: rgba(117, 117, 117, 0.1);
+            color: var(--gray);
+        }
+
+        .status-pending {
+            background: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .status-completed {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .status-cancelled {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+        }
+
+        /* ========== CUSTOM SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">
+            <i class="fas fa-motorcycle"></i>
+            <span>THE LAND RIDERS</span>
+        </div>
+        <div class="loading-spinner"></div>
+        <p style="color: white; margin-top: 30px; font-size: 1.1rem;">Initializing Muzaffarabad Ride Service...</p>
+    </div>
+
+    <!-- Welcome Screen -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-container">
+            <div class="brand-logo">
+                <i class="fas fa-motorcycle"></i>
+                <span class="brand-name">THE LAND RIDERS</span>
+            </div>
+            
+            <h1 class="welcome-title">Welcome to Muzaffarabad's Premium Ride Service</h1>
+            <p class="welcome-subtitle">Safe, reliable, and affordable rides across Muzaffarabad. Book bikes & cars instantly with verified riders.</p>
+            
+            <div class="welcome-buttons">
+                <button class="btn btn-primary btn-lg btn-block" onclick="showAuth('customer')">
+                    <i class="fas fa-user"></i> Continue as Customer
+                </button>
+                <button class="btn btn-secondary btn-lg btn-block" onclick="showRiderAuth()">
+                    <i class="fas fa-motorcycle"></i> Continue as Rider
+                </button>
+                <button class="btn btn-secondary btn-lg btn-block" onclick="showAuth('admin')">
+                    <i class="fas fa-user-shield"></i> Admin Login
+                </button>
+            </div>
+            
+            <div style="margin-top: 50px; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
+                <p><i class="fas fa-phone-alt"></i> 24/7 Support: 0301-3036146</p>
+                <p><i class="fas fa-map-marker-alt"></i> Serving Muzaffarabad, AJK, Pakistan</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Auth -->
+    <div class="auth-container" id="customerAuth">
+        <button class="auth-back-btn" onclick="backToWelcome()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Customer Registration</h2>
+                <p>Create your account to start booking rides</p>
+            </div>
+
+            <!-- Registration Steps -->
+            <div class="form-steps">
+                <div class="step active" id="step1">1</div>
+                <div class="step" id="step2">2</div>
+                <div class="step" id="step3">3</div>
+            </div>
+
+            <!-- Step 1: Phone Number -->
+            <div class="form-step active" id="customerStep1">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-phone"></i> Phone Number
+                    </label>
+                    <input type="tel" class="form-input" id="customerPhone" placeholder="+92 300 1234567" required>
+                    <span class="form-hint">Enter your WhatsApp number for ride updates</span>
+                    <div class="error-message" id="customerPhoneError">
+                        <i class="fas fa-exclamation-circle"></i> Please enter a valid phone number
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="nextStep('customer', 2)">
+                    Continue <i class="fas fa-arrow-right"></i>
+                </button>
+                <p style="text-align: center; margin-top: 20px; color: var(--gray);">
+                    Already have an account? 
+                    <a href="#" onclick="showLogin('customer')" style="color: var(--primary); font-weight: 600;">Login here</a>
+                </p>
+            </div>
+
+            <!-- Step 2: Name -->
+            <div class="form-step" id="customerStep2">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Full Name
+                    </label>
+                    <input type="text" class="form-input" id="customerName" placeholder="Enter your full name" required>
+                    <div class="error-message" id="customerNameError">
+                        <i class="fas fa-exclamation-circle"></i> Please enter your name
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i> Email (Optional)
+                    </label>
+                    <input type="email" class="form-input" id="customerEmail" placeholder="email@example.com">
+                    <span class="form-hint">For receipts and important notifications</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="nextStep('customer', 1)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="nextStep('customer', 3)">
+                        Continue <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Password -->
+            <div class="form-step" id="customerStep3">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Create Password
+                    </label>
+                    <input type="password" class="form-input" id="customerPassword" placeholder="Create a strong password" required>
+                    <div class="error-message" id="customerPasswordError">
+                        <i class="fas fa-exclamation-circle"></i> Password must be at least 6 characters
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Confirm Password
+                    </label>
+                    <input type="password" class="form-input" id="customerConfirmPassword" placeholder="Re-enter your password" required>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="nextStep('customer', 2)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-success" style="flex: 1;" onclick="registerCustomer()">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Login -->
+    <div class="auth-container" id="customerLogin">
+        <button class="auth-back-btn" onclick="showAuth('customer')">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Customer Login</h2>
+                <p>Welcome back to THE LAND RIDERS</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-phone"></i> Phone Number
+                </label>
+                <input type="tel" class="form-input" id="loginCustomerPhone" placeholder="+92 300 1234567" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" class="form-input" id="loginCustomerPassword" placeholder="Enter your password" required>
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="loginCustomer()">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+
+            <p style="text-align: center; margin-top: 20px; color: var(--gray);">
+                Don't have an account? 
+                <a href="#" onclick="showAuth('customer')" style="color: var(--primary); font-weight: 600;">Register here</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Rider Auth -->
+    <div class="auth-container" id="riderAuth">
+        <button class="auth-back-btn" onclick="backToWelcome()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Rider Registration</h2>
+                <p>Join our professional rider community in Muzaffarabad</p>
+            </div>
+
+            <!-- WhatsApp Contact Section -->
+            <div class="whatsapp-section">
+                <h4><i class="fab fa-whatsapp"></i> Contact for Registration</h4>
+                <p style="margin-bottom: 20px; color: var(--dark);">
+                    To become a verified rider with THE LAND RIDERS, please contact us for verification and approval process.
+                    After verification, you will receive your unique Rider ID and login details.
+                </p>
+                
+                <div class="contact-options">
+                    <a href="https://wa.me/923013036146?text=Hello%20I%20want%20to%20join%20THE%20LAND%20RIDERS%20as%20a%20rider" 
+                       target="_blank" class="contact-option whatsapp">
+                        <i class="fab fa-whatsapp"></i> WhatsApp: 0301-3036146
+                    </a>
+                    <a href="tel:03013036146" class="contact-option call">
+                        <i class="fas fa-phone"></i> Call: 0301-3036146
+                    </a>
+                </div>
+                
+                <p style="margin-top: 25px; color: var(--gray); font-size: 0.95rem;">
+                    <i class="fas fa-info-circle"></i> Our team will contact you within 24 hours after receiving your request.
+                </p>
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="showRiderLogin()" style="margin-bottom: 15px;">
+                <i class="fas fa-sign-in-alt"></i> Already have Rider ID? Login Here
+            </button>
+
+            <button class="btn btn-secondary btn-block" onclick="backToWelcome()">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+        </div>
+    </div>
+
+    <!-- Rider Login -->
+    <div class="auth-container" id="riderLogin">
+        <button class="auth-back-btn" onclick="showRiderAuth()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Rider Login</h2>
+                <p>Enter your Rider ID and password to access your dashboard</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-id-card"></i> Rider ID
+                </label>
+                <input type="text" class="form-input" id="riderId" placeholder="Enter 5-digit Rider ID (e.g., 54321)" required>
+                <span class="form-hint">Provided by admin after verification</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" class="form-input" id="riderPassword" placeholder="Enter your password" required>
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="loginRider()">
+                <i class="fas fa-sign-in-alt"></i> Login as Rider
+            </button>
+
+            <p style="text-align: center; margin-top: 20px; color: var(--gray);">
+                Don't have Rider ID? 
+                <a href="#" onclick="showRiderAuth()" style="color: var(--primary); font-weight: 600;">Contact for Registration</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Admin Login -->
+    <div class="auth-container" id="adminAuth">
+        <button class="auth-back-btn" onclick="backToWelcome()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Admin Login</h2>
+                <p>Administrator Access - Authorized Personnel Only</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-user-shield"></i> Admin Name
+                </label>
+                <input type="text" class="form-input" id="adminName" placeholder="Enter admin name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" class="form-input" id="adminPassword" placeholder="Enter admin password" required>
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="loginAdmin()">
+                <i class="fas fa-sign-in-alt"></i> Login as Admin
+            </button>
+
+            <p style="text-align: center; margin-top: 20px; color: var(--gray); font-size: 0.9rem;">
+                <i class="fas fa-shield-alt"></i> Secure access only for authorized administrators
+            </p>
+        </div>
+    </div>
+
+    <!-- Customer Dashboard -->
+    <div class="dashboard" id="customerDashboard">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-motorcycle logo-icon"></i>
+                    <span>THE LAND RIDERS</span>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="notification-badge" onclick="showNotifications()" id="notificationBadge">
+                        <i class="fas fa-bell" style="font-size: 1.3rem; color: var(--primary);"></i>
+                        <span class="badge" id="notificationCount">0</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar" id="customerAvatar">C</div>
+                        <div>
+                            <div id="customerWelcome" style="font-weight: 600;">Welcome</div>
+                            <div style="font-size: 0.85rem; color: var(--gray);">Customer</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="booking-panel">
+                <!-- Active Ride Section -->
+                <div class="active-ride-section" id="activeRideSection">
+                    <h3><i class="fas fa-biking"></i> Active Ride</h3>
+                    
+                    <div class="ride-info-grid" id="activeRideDetails">
+                        <!-- Active ride details will appear here -->
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="cancelRide('customer')" style="flex: 1;">
+                            <i class="fas fa-times"></i> Cancel Ride
+                        </button>
+                        <button class="btn btn-success" onclick="completeRide()" style="flex: 1;">
+                            <i class="fas fa-check"></i> Ride Completed
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Location Selection -->
+                <div class="booking-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> Plan Your Ride</h3>
+                    
+                    <div class="location-inputs">
+                        <div class="location-input">
+                            <i class="fas fa-location-arrow"></i>
+                            <input type="text" id="pickupLocation" placeholder="Your current location" readonly>
+                        </div>
+                        <div class="location-input">
+                            <i class="fas fa-flag-checkered"></i>
+                            <input type="text" id="destinationLocation" placeholder="Where to? (e.g., University, Bus Stand)" required>
+                        </div>
+                        
+                        <div class="location-actions">
+                            <button class="btn btn-success" onclick="useCurrentLocation()">
+                                <i class="fas fa-location-crosshairs"></i> Use My Location
+                            </button>
+                            <button class="btn btn-secondary" onclick="selectOnMap()">
+                                <i class="fas fa-map"></i> Choose on Map
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-car"></i> Select Vehicle Type
+                        </label>
+                        <div class="vehicle-selection">
+                            <div class="vehicle-option active" onclick="selectVehicle('bike')">
+                                <i class="fas fa-motorcycle"></i>
+                                <div class="vehicle-name">Bike</div>
+                                <div class="vehicle-price">Starting from Rs 100</div>
+                            </div>
+                            <div class="vehicle-option" onclick="selectVehicle('car')">
+                                <i class="fas fa-car"></i>
+                                <div class="vehicle-name">Car</div>
+                                <div class="vehicle-price">Starting from Rs 300</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" onclick="searchRiders()" id="searchRidersBtn">
+                        <i class="fas fa-search"></i> Find Available Riders
+                    </button>
+                </div>
+
+                <!-- Available Offers -->
+                <div class="booking-section" id="offersSection" style="display: none;">
+                    <h3><i class="fas fa-tags"></i> Available Offers</h3>
+                    <p style="color: var(--gray); margin-bottom: 20px;">
+                        Select the best offer from available riders
+                    </p>
+                    
+                    <div class="offers-container" id="offersContainer">
+                        <!-- Offers will be dynamically added here -->
+                    </div>
+                    
+                    <button class="btn btn-danger btn-block" onclick="cancelSearch()" style="margin-top: 20px;">
+                        <i class="fas fa-times"></i> Cancel Search
+                    </button>
+                </div>
+
+                <!-- Complain Section -->
+                <div class="booking-section">
+                    <h3><i class="fas fa-comment-alt"></i> Submit Feedback</h3>
+                    <p style="color: var(--gray); margin-bottom: 15px;">
+                        Rate your experience or submit a complaint about a rider
+                    </p>
+                    
+                    <button class="btn btn-warning btn-block" onclick="openComplainModal()">
+                        <i class="fas fa-exclamation-triangle"></i> Submit Complaint
+                    </button>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-overlay" id="mapOverlay">
+                    <h4 style="margin-bottom: 10px; color: var(--primary);">
+                        <i class="fas fa-info-circle"></i> Map Instructions
+                    </h4>
+                    <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 10px;">
+                        • Click on map to select pickup/destination<br>
+                        • Blue marker: Your location<br>
+                        • Green markers: Available riders
+                    </p>
+                    <button class="btn btn-secondary btn-block" onclick="hideMapOverlay()" style="padding: 8px;">
+                        Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rider Dashboard -->
+    <div class="dashboard rider-dashboard" id="riderDashboard">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-motorcycle logo-icon"></i>
+                    <span>THE LAND RIDERS</span>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="notification-badge" onclick="showNotifications()">
+                        <i class="fas fa-bell" style="font-size: 1.3rem; color: var(--primary);"></i>
+                        <span class="badge" id="riderNotificationCount">0</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar" id="riderAvatar">R</div>
+                        <div>
+                            <div id="riderWelcome" style="font-weight: 600;">Rider</div>
+                            <div style="font-size: 0.85rem; color: var(--gray);" id="riderStatusText">Offline</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="rider-panel">
+                <!-- Status Card -->
+                <div class="status-card">
+                    <h3 style="color: white; margin-bottom: 20px;">
+                        <i class="fas fa-user-circle"></i> Rider Control Panel
+                    </h3>
+                    
+                    <div class="status-toggle">
+                        <span style="font-weight: 600; font-size: 1.1rem;">Go Online</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="riderStatusToggle" onchange="toggleRiderStatus()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="status-indicator" id="riderStatusIndicator">
+                        <i class="fas fa-circle"></i>
+                        <span id="statusText">Offline</span>
+                    </div>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <div style="flex: 1; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700;">0</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9;">Today's Rides</div>
+                        </div>
+                        <div style="flex: 1; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700;">Rs 0</div>
+                            <div style="font-size: 0.85rem; opacity: 0.9;">Today's Earnings</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Location Section -->
+                <div class="live-location-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Live Location Sharing</h4>
+                    <p style="color: var(--gray); margin-bottom: 15px; font-size: 0.95rem;">
+                        Share your live location to appear on customer maps and receive ride requests
+                    </p>
+                    
+                    <div class="location-share">
+                        <input type="text" id="liveLocationInput" 
+                               placeholder="Enter Google Maps share link or location name">
+                        <button class="btn btn-success" onclick="shareLiveLocation()">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                    </div>
+                    
+                    <div class="share-duration">
+                        <button class="duration-btn active" onclick="setShareDuration(1)">1 Hour</button>
+                        <button class="duration-btn" onclick="setShareDuration(4)">4 Hours</button>
+                        <button class="duration-btn" onclick="setShareDuration(8)">8 Hours</button>
+                        <button class="duration-btn" onclick="setShareDuration(24)">24 Hours</button>
+                    </div>
+                    
+                    <div class="success-message" id="locationShareStatus">
+                        <i class="fas fa-check-circle"></i> Location shared successfully
+                    </div>
+                </div>
+
+                <!-- Active Ride -->
+                <div id="riderActiveRideSection" style="display: none;">
+                    <div class="active-ride-section">
+                        <h3 style="color: white; margin-bottom: 20px;">
+                            <i class="fas fa-biking"></i> Active Ride
+                        </h3>
+                        
+                        <div class="ride-info-grid" id="riderActiveRideDetails">
+                            <!-- Active ride details will appear here -->
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; margin-top: 20px;">
+                            <button class="btn btn-danger" onclick="cancelRide('rider')" style="flex: 1;">
+                                <i class="fas fa-times"></i> Cancel Ride
+                            </button>
+                            <button class="btn btn-success" onclick="completeRide()" style="flex: 1;">
+                                <i class="fas fa-check"></i> Ride Completed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ride Requests -->
+                <div class="booking-section">
+                    <h3><i class="fas fa-bell"></i> New Ride Requests</h3>
+                    <p style="color: var(--gray); margin-bottom: 15px; font-size: 0.95rem;">
+                        You will receive notifications when customers request rides
+                    </p>
+                    
+                    <div class="requests-container" id="requestsContainer">
+                        <!-- Ride requests will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="riderMap"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="dashboard admin-dashboard" id="adminDashboard">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-motorcycle logo-icon"></i>
+                    <span>THE LAND RIDERS</span>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="user-info">
+                        <div class="user-avatar" id="adminAvatar">A</div>
+                        <div>
+                            <div id="adminWelcome" style="font-weight: 600;">Administrator</div>
+                            <div style="font-size: 0.85rem; color: var(--gray);">Admin Panel</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <!-- Statistics -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCustomers">0</div>
+                    <div class="stat-label">Total Customers</div>
+                    <span class="stat-change positive" id="customerChange">+0 Today</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalRides">0</div>
+                    <div class="stat-label">Total Rides</div>
+                    <span class="stat-change positive" id="rideChange">+0 Today</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeRiders">0</div>
+                    <div class="stat-label">Active Riders</div>
+                    <span class="stat-change" id="riderChange">0 Online</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalEarnings">Rs 0</div>
+                    <div class="stat-label">Total Earnings</div>
+                    <span class="stat-change positive" id="earningChange">+Rs 0 Today</span>
+                </div>
+            </div>
+
+            <!-- Rider Management -->
+            <div class="admin-section">
+                <h3><i class="fas fa-users"></i> Rider Management</h3>
+                <button class="btn btn-primary" onclick="openAddRiderModal()" style="margin-bottom: 20px;">
+                    <i class="fas fa-user-plus"></i> Add New Rider
+                </button>
+                
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Rider ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Vehicle</th>
+                            <th>Rating</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riderTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                                No riders added yet. Click "Add New Rider" to get started.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Recent Rides -->
+            <div class="admin-section">
+                <h3><i class="fas fa-history"></i> Recent Rides</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Ride ID</th>
+                            <th>Customer</th>
+                            <th>Rider</th>
+                            <th>From → To</th>
+                            <th>Fare</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ridesTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                                No rides completed yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Complaints -->
+            <div class="admin-section">
+                <h3><i class="fas fa-exclamation-triangle"></i> Customer Complaints</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Rider</th>
+                            <th>Complaint</th>
+                            <th>Rating</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="complaintsTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                                No complaints yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Admin Management -->
+            <div class="admin-section">
+                <h3><i class="fas fa-user-shield"></i> Admin Management</h3>
+                <button class="btn btn-success" onclick="openAddAdminModal()" style="margin-bottom: 20px;">
+                    <i class="fas fa-user-plus"></i> Add New Admin
+                </button>
+                
+                <div style="background: var(--light-gray); padding: 20px; border-radius: 10px;">
+                    <h4 style="margin-bottom: 15px; color: var(--primary);">Current Admins</h4>
+                    <div id="adminList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--light-gray);">
+                            <div style="font-weight: 600; color: var(--primary);">safeer</div>
+                            <div style="font-size: 0.85rem; color: var(--gray);">Primary Admin</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="modal" id="loadingOverlay">
+        <div class="modal-content" style="max-width: 300px; background: transparent; box-shadow: none;">
+            <div style="text-align: center;">
+                <div class="loading-spinner"></div>
+                <p style="color: white; margin-top: 20px; font-size: 1.1rem;" id="loadingText">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-info-circle"></i>
+        <span id="toastMessage">Notification</span>
+    </div>
+
+    <!-- Complain Modal -->
+    <div class="modal" id="complainModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Submit Complaint</h3>
+                <button onclick="closeModal('complainModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i> Your Email
+                    </label>
+                    <input type="email" class="form-input" id="complainEmail" placeholder="Enter your email for follow-up" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-motorcycle"></i> Select Rider
+                    </label>
+                    <select class="form-input" id="complainRider" required>
+                        <option value="">Select a rider</option>
+                        <!-- Riders will be populated -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-star"></i> Rate your experience
+                    </label>
+                    <div class="rating-input">
+                        <i class="fas fa-star rating-star" data-rating="1"></i>
+                        <i class="fas fa-star rating-star" data-rating="2"></i>
+                        <i class="fas fa-star rating-star" data-rating="3"></i>
+                        <i class="fas fa-star rating-star" data-rating="4"></i>
+                        <i class="fas fa-star rating-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="complainRating" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-comment"></i> Complaint Details
+                    </label>
+                    <textarea class="form-input" id="complainDetails" 
+                              placeholder="Describe your complaint in detail. Include what happened, when, and any other relevant information." 
+                              rows="5" required></textarea>
+                </div>
+                
+                <button class="btn btn-warning btn-block" onclick="submitComplaint()">
+                    <i class="fas fa-paper-plane"></i> Submit Complaint
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Rider Modal (Admin) -->
+    <div class="modal" id="addRiderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Add New Rider</h3>
+                <button onclick="closeModal('addRiderModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Rider Name
+                    </label>
+                    <input type="text" class="form-input" id="newRiderName" placeholder="Enter rider's full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-phone"></i> Phone Number
+                    </label>
+                    <input type="tel" class="form-input" id="newRiderPhone" placeholder="+92 300 1234567" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-car"></i> Vehicle Type
+                    </label>
+                    <select class="form-input" id="newRiderVehicle" required>
+                        <option value="bike">Bike</option>
+                        <option value="car">Car</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-hashtag"></i> Vehicle Number
+                    </label>
+                    <input type="text" class="form-input" id="newRiderVehicleNo" placeholder="MZ-123" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-id-card"></i> Generate Rider ID
+                    </label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" class="form-input" id="newRiderId" placeholder="Click Generate" readonly style="flex: 1;">
+                        <button class="btn btn-secondary" onclick="generateRiderId()">
+                            <i class="fas fa-sync-alt"></i> Generate
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Set Password
+                    </label>
+                    <input type="password" class="form-input" id="newRiderPassword" placeholder="Set login password" required>
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="addNewRider()">
+                    <i class="fas fa-save"></i> Save Rider
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Admin Modal -->
+    <div class="modal" id="addAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-shield"></i> Add New Admin</h3>
+                <button onclick="closeModal('addAdminModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Admin Name
+                    </label>
+                    <input type="text" class="form-input" id="newAdminName" placeholder="Enter admin name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" class="form-input" id="newAdminPassword" placeholder="Set admin password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Confirm Password
+                    </label>
+                    <input type="password" class="form-input" id="newAdminConfirmPassword" placeholder="Confirm password" required>
+                </div>
+                
+                <button class="btn btn-success btn-block" onclick="addNewAdmin()">
+                    <i class="fas fa-user-plus"></i> Add Admin
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div class="modal" id="notificationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bell"></i> Notifications</h3>
+                <button onclick="closeModal('notificationModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="notificationList">
+                    <!-- Notifications will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Confirmation Modal -->
+    <div class="modal" id="whatsappConfirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fab fa-whatsapp"></i> Contact Confirmation</h3>
+                <button onclick="closeModal('whatsappConfirmModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fab fa-whatsapp" style="font-size: 4rem; color: #25D366; margin-bottom: 20px;"></i>
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">Thank You!</h4>
+                    <p style="color: var(--gray); margin-bottom: 20px;">
+                        We have received your rider registration request. Our team will contact you on WhatsApp within 24 hours for verification.
+                    </p>
+                    <p style="color: var(--gray); margin-bottom: 25px; font-size: 0.95rem;">
+                        Please keep your phone handy for our call/message.
+                    </p>
+                    <button class="btn btn-success btn-block" onclick="closeModal('whatsappConfirmModal')">
+                        <i class="fas fa-check"></i> Okay, Thanks
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // ========== APPLICATION STATE ==========
+        const APP_STATE = {
+            // User management
+            currentUser: null,
+            userRole: null,
+            
+            // Data storage (using localStorage)
+            customers: JSON.parse(localStorage.getItem('landRiders_customers')) || [],
+            riders: JSON.parse(localStorage.getItem('landRiders_riders')) || [],
+            rides: JSON.parse(localStorage.getItem('landRiders_rides')) || [],
+            complaints: JSON.parse(localStorage.getItem('landRiders_complaints')) || [],
+            notifications: JSON.parse(localStorage.getItem('landRiders_notifications')) || [],
+            admins: JSON.parse(localStorage.getItem('landRiders_admins')) || [],
+            
+            // Current session
+            currentRide: null,
+            selectedVehicle: 'bike',
+            availableRiders: [],
+            rideOffers: [],
+            currentLocation: null,
+            destination: null,
+            map: null,
+            riderMap: null,
+            markers: [],
+            riderMarkers: [],
+            liveLocationInterval: null,
+            shareDuration: 1,
+            currentStep: 1
+        };
+
+        // ========== INITIALIZATION ==========
+        function initApp() {
+            // Hide loading screen after 2 seconds
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    showWelcomeScreen();
+                    initializeSampleData();
+                }, 500);
+            }, 2000);
+
+            // Initialize Leaflet maps
+            initMaps();
+            
+            // Load saved data
+            loadSavedData();
+        }
+
+        function initializeSampleData() {
+            // Initialize admin if not exists
+            if (APP_STATE.admins.length === 0) {
+                APP_STATE.admins = [
+                    { name: 'safeer', password: 'safeer786', isPrimary: true }
+                ];
+                saveData('admins');
+            }
+            
+            // Initialize sample riders for demo
+            if (APP_STATE.riders.length === 0) {
+                APP_STATE.riders = [
+                    {
+                        id: '12345',
+                        name: 'Ahmed Khan',
+                        phone: '+92 300 1112233',
+                        password: 'ahmed123',
+                        status: 'online',
+                        rating: 4.8,
+                        totalRides: 145,
+                        vehicleType: 'bike',
+                        vehicleNumber: 'MZ-123',
+                        location: { lat: 34.368, lng: 73.471 },
+                        liveLocation: 'https://maps.google.com/?q=34.368,73.471',
+                        earnings: 45000,
+                        joinedDate: new Date().toISOString().split('T')[0]
+                    },
+                    {
+                        id: '54321',
+                        name: 'Usman Ali',
+                        phone: '+92 300 2223344',
+                        password: 'usman123',
+                        status: 'online',
+                        rating: 4.5,
+                        totalRides: 98,
+                        vehicleType: 'car',
+                        vehicleNumber: 'MZ-456',
+                        location: { lat: 34.372, lng: 73.475 },
+                        liveLocation: 'https://maps.google.com/?q=34.372,73.475',
+                        earnings: 32000,
+                        joinedDate: new Date().toISOString().split('T')[0]
+                    }
+                ];
+                saveData('riders');
+            }
+            
+            // Initialize sample customers
+            if (APP_STATE.customers.length === 0) {
+                APP_STATE.customers = [
+                    {
+                        phone: '+92 300 3334455',
+                        name: 'Ali Raza',
+                        email: 'ali@example.com',
+                        password: 'ali123',
+                        totalRides: 12,
+                        joinedDate: new Date().toISOString().split('T')[0]
+                    }
+                ];
+                saveData('customers');
+            }
+        }
+
+        function loadSavedData() {
+            // Load all data from localStorage
+            APP_STATE.customers = JSON.parse(localStorage.getItem('landRiders_customers')) || [];
+            APP_STATE.riders = JSON.parse(localStorage.getItem('landRiders_riders')) || [];
+            APP_STATE.rides = JSON.parse(localStorage.getItem('landRiders_rides')) || [];
+            APP_STATE.complaints = JSON.parse(localStorage.getItem('landRiders_complaints')) || [];
+            APP_STATE.notifications = JSON.parse(localStorage.getItem('landRiders_notifications')) || [];
+            APP_STATE.admins = JSON.parse(localStorage.getItem('landRiders_admins')) || [];
+        }
+
+        function saveData(type) {
+            switch(type) {
+                case 'customers':
+                    localStorage.setItem('landRiders_customers', JSON.stringify(APP_STATE.customers));
+                    break;
+                case 'riders':
+                    localStorage.setItem('landRiders_riders', JSON.stringify(APP_STATE.riders));
+                    break;
+                case 'rides':
+                    localStorage.setItem('landRiders_rides', JSON.stringify(APP_STATE.rides));
+                    break;
+                case 'complaints':
+                    localStorage.setItem('landRiders_complaints', JSON.stringify(APP_STATE.complaints));
+                    break;
+                case 'notifications':
+                    localStorage.setItem('landRiders_notifications', JSON.stringify(APP_STATE.notifications));
+                    break;
+                case 'admins':
+                    localStorage.setItem('landRiders_admins', JSON.stringify(APP_STATE.admins));
+                    break;
+            }
+        }
+
+        // ========== MAP FUNCTIONS ==========
+        function initMaps() {
+            // Initialize customer map
+            APP_STATE.map = L.map('map').setView([34.368, 73.471], 14);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(APP_STATE.map);
+            
+            // Initialize rider map
+            APP_STATE.riderMap = L.map('riderMap').setView([34.368, 73.471], 14);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(APP_STATE.riderMap);
+            
+            // Add click event for location selection
+            APP_STATE.map.on('click', function(e) {
+                if (APP_STATE.userRole === 'customer') {
+                    selectLocationOnMap(e.latlng);
+                }
+            });
+        }
+
+        function updateRiderMarkers() {
+            // Clear existing markers
+            APP_STATE.markers.forEach(marker => marker.remove());
+            APP_STATE.markers = [];
+            
+            // Add markers for online riders with live location
+            APP_STATE.riders.forEach(rider => {
+                if (rider.status === 'online' && rider.location) {
+                    const marker = L.marker([rider.location.lat, rider.location.lng], {
+                        icon: L.divIcon({
+                            html: `<div style="background: ${rider.vehicleType === 'car' ? '#2196F3' : '#4CAF50'}; 
+                                  width: 40px; height: 40px; border-radius: 50%; display: flex; 
+                                  align-items: center; justify-content: center; color: white;
+                                  border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                                  <i class="fas fa-${rider.vehicleType === 'car' ? 'car' : 'motorcycle'}"></i>
+                                  </div>`,
+                            className: 'rider-marker',
+                            iconSize: [40, 40]
+                        })
+                    })
+                    .addTo(APP_STATE.map)
+                    .bindPopup(`
+                        <div style="padding: 10px;">
+                            <h4 style="margin: 0 0 10px 0; color: var(--primary);">${rider.name}</h4>
+                            <p style="margin: 5px 0; font-size: 0.9em;">
+                                <i class="fas fa-star" style="color: #FFD600;"></i> ${rider.rating} ⭐
+                            </p>
+                            <p style="margin: 5px 0; font-size: 0.9em;">
+                                <i class="fas fa-${rider.vehicleType === 'car' ? 'car' : 'motorcycle'}"></i> ${rider.vehicleNumber}
+                            </p>
+                            <button onclick="selectRiderFromMap('${rider.id}')" 
+                                    style="background: var(--primary); color: white; border: none; 
+                                    padding: 8px 15px; border-radius: 5px; cursor: pointer; 
+                                    margin-top: 10px; width: 100%;">
+                                Select Rider
+                            </button>
+                        </div>
+                    `);
+                    
+                    APP_STATE.markers.push(marker);
+                }
+            });
+        }
+
+        function selectLocationOnMap(latlng) {
+            APP_STATE.currentLocation = latlng;
+            document.getElementById('pickupLocation').value = `Selected Location (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`;
+            showToast('Location selected on map', 'success');
+            
+            // Add marker
+            L.marker([latlng.lat, latlng.lng], {
+                icon: L.divIcon({
+                    html: `<div style="background: #2196F3; width: 30px; height: 30px; border-radius: 50%;
+                           display: flex; align-items: center; justify-content: center; color: white;
+                           border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                           <i class="fas fa-map-marker-alt"></i></div>`,
+                    className: 'location-marker',
+                    iconSize: [30, 30]
+                })
+            }).addTo(APP_STATE.map).bindPopup('Selected Location').openPopup();
+        }
+
+        function selectOnMap() {
+            showToast('Click on the map to select your location', 'info');
+        }
+
+        function hideMapOverlay() {
+            document.getElementById('mapOverlay').style.display = 'none';
+        }
+
+        // ========== UI NAVIGATION ==========
+        function showWelcomeScreen() {
+            hideAllScreens();
+            document.getElementById('welcomeScreen').style.display = 'block';
+        }
+
+        function showAuth(type) {
+            hideAllScreens();
+            document.getElementById(type + 'Auth').style.display = 'flex';
+            APP_STATE.currentStep = 1;
+            updateStepIndicators();
+        }
+
+        function showLogin(type) {
+            hideAllScreens();
+            document.getElementById(type + 'Login').style.display = 'flex';
+        }
+
+        function showRiderAuth() {
+            hideAllScreens();
+            document.getElementById('riderAuth').style.display = 'flex';
+        }
+
+        function showRiderLogin() {
+            hideAllScreens();
+            document.getElementById('riderLogin').style.display = 'flex';
+        }
+
+        function backToWelcome() {
+            showWelcomeScreen();
+        }
+
+        function hideAllScreens() {
+            const screens = ['welcomeScreen', 'customerAuth', 'customerLogin', 
+                           'riderAuth', 'riderLogin', 'adminAuth', 'customerDashboard',
+                           'riderDashboard', 'adminDashboard'];
+            screens.forEach(screen => {
+                document.getElementById(screen).style.display = 'none';
+            });
+        }
+
+        // ========== FORM STEP MANAGEMENT ==========
+        function nextStep(type, step) {
+            if (!validateStep(type, APP_STATE.currentStep)) {
+                return;
+            }
+            
+            // Update step indicators
+            APP_STATE.currentStep = step;
+            updateStepIndicators();
+            
+            // Switch steps
+            document.querySelectorAll(`#${type}Step1, #${type}Step2, #${type}Step3`).forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(`${type}Step${step}`).classList.add('active');
+        }
+
+        function updateStepIndicators() {
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`step${i}`);
+                if (i < APP_STATE.currentStep) {
+                    stepEl.className = 'step completed';
+                } else if (i === APP_STATE.currentStep) {
+                    stepEl.className = 'step active';
+                } else {
+                    stepEl.className = 'step';
+                }
+            }
+        }
+
+        function validateStep(type, step) {
+            switch(step) {
+                case 1:
+                    const phone = document.getElementById('customerPhone').value;
+                    if (!phone || phone.length < 10) {
+                        showError('customerPhoneError', 'Please enter a valid phone number');
+                        return false;
+                    }
+                    return true;
+                    
+                case 2:
+                    const name = document.getElementById('customerName').value;
+                    if (!name || name.length < 3) {
+                        showError('customerNameError', 'Please enter your full name');
+                        return false;
+                    }
+                    return true;
+                    
+                case 3:
+                    const password = document.getElementById('customerPassword').value;
+                    const confirmPassword = document.getElementById('customerConfirmPassword').value;
+                    
+                    if (!password || password.length < 6) {
+                        showError('customerPasswordError', 'Password must be at least 6 characters');
+                        return false;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        showError('customerPasswordError', 'Passwords do not match');
+                        return false;
+                    }
+                    return true;
+            }
+            return true;
+        }
+
+        // ========== CUSTOMER REGISTRATION & LOGIN ==========
+        function registerCustomer() {
+            const phone = document.getElementById('customerPhone').value;
+            const name = document.getElementById('customerName').value;
+            const email = document.getElementById('customerEmail').value;
+            const password = document.getElementById('customerPassword').value;
+            
+            // Check if customer already exists
+            const existingCustomer = APP_STATE.customers.find(c => c.phone === phone);
+            if (existingCustomer) {
+                showToast('Phone number already registered', 'error');
+                return;
+            }
+            
+            // Create new customer
+            const newCustomer = {
+                phone,
+                name,
+                email: email || '',
+                password,
+                totalRides: 0,
+                joinedDate: new Date().toISOString().split('T')[0]
+            };
+            
+            APP_STATE.customers.push(newCustomer);
+            saveData('customers');
+            
+            // Auto login
+            APP_STATE.currentUser = newCustomer;
+            APP_STATE.userRole = 'customer';
+            
+            showToast('Registration successful!', 'success');
+            showCustomerDashboard();
+            
+            // Request location permission
+            requestLocationPermission();
+        }
+
+        function loginCustomer() {
+            const phone = document.getElementById('loginCustomerPhone').value;
+            const password = document.getElementById('loginCustomerPassword').value;
+            
+            const customer = APP_STATE.customers.find(c => c.phone === phone && c.password === password);
+            
+            if (customer) {
+                APP_STATE.currentUser = customer;
+                APP_STATE.userRole = 'customer';
+                
+                showToast('Login successful!', 'success');
+                showCustomerDashboard();
+                
+                // Request location permission
+                requestLocationPermission();
+            } else {
+                showToast('Invalid phone number or password', 'error');
+            }
+        }
+
+        // ========== RIDER LOGIN ==========
+        function loginRider() {
+            const riderId = document.getElementById('riderId').value;
+            const password = document.getElementById('riderPassword').value;
+            
+            const rider = APP_STATE.riders.find(r => r.id === riderId && r.password === password);
+            
+            if (rider) {
+                APP_STATE.currentUser = rider;
+                APP_STATE.userRole = 'rider';
+                
+                showToast('Welcome back, ' + rider.name + '!', 'success');
+                showRiderDashboard();
+            } else {
+                showToast('Invalid Rider ID or password', 'error');
+            }
+        }
+
+        // ========== ADMIN LOGIN ==========
+        function loginAdmin() {
+            const name = document.getElementById('adminName').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            const admin = APP_STATE.admins.find(a => a.name === name && a.password === password);
+            
+            if (admin) {
+                APP_STATE.currentUser = { name: admin.name, isPrimary: admin.isPrimary };
+                APP_STATE.userRole = 'admin';
+                
+                showToast('Admin login successful!', 'success');
+                showAdminDashboard();
+            } else {
+                showToast('Invalid admin credentials', 'error');
+            }
+        }
+
+        // ========== DASHBOARD FUNCTIONS ==========
+        function showCustomerDashboard() {
+            hideAllScreens();
+            document.getElementById('customerDashboard').style.display = 'block';
+            
+            // Update welcome message
+            document.getElementById('customerWelcome').textContent = 'Hello, ' + APP_STATE.currentUser.name;
+            document.getElementById('customerAvatar').textContent = APP_STATE.currentUser.name.charAt(0).toUpperCase();
+            
+            // Update map with rider markers
+            updateRiderMarkers();
+            
+            // Load notifications
+            updateNotificationCount();
+            
+            // Check for active ride
+            checkActiveRide();
+        }
+
+        function showRiderDashboard() {
+            hideAllScreens();
+            document.getElementById('riderDashboard').style.display = 'block';
+            
+            // Update rider info
+            document.getElementById('riderWelcome').textContent = APP_STATE.currentUser.name;
+            document.getElementById('riderAvatar').textContent = APP_STATE.currentUser.name.charAt(0).toUpperCase();
+            
+            // Set initial status
+            updateRiderStatusUI();
+            
+            // Load notifications
+            updateNotificationCount();
+            
+            // Load ride requests
+            loadRideRequests();
+            
+            // Check for active ride
+            checkActiveRide();
+        }
+
+        function showAdminDashboard() {
+            hideAllScreens();
+            document.getElementById('adminDashboard').style.display = 'block';
+            
+            // Update admin info
+            document.getElementById('adminWelcome').textContent = APP_STATE.currentUser.name;
+            document.getElementById('adminAvatar').textContent = APP_STATE.currentUser.name.charAt(0).toUpperCase();
+            
+            // Load statistics
+            loadAdminStats();
+            
+            // Load riders table
+            loadRidersTable();
+            
+            // Load rides table
+            loadRidesTable();
+            
+            // Load complaints table
+            loadComplaintsTable();
+            
+            // Load admin list
+            loadAdminList();
+        }
+
+        // ========== LOCATION SERVICES ==========
+        function requestLocationPermission() {
+            if (navigator.geolocation) {
+                showLoading('Getting your location...');
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        APP_STATE.currentLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        document.getElementById('pickupLocation').value = "Your Current Location";
+                        showToast('Location detected successfully', 'success');
+                        hideLoading();
+                        
+                        // Update map view
+                        if (APP_STATE.map) {
+                            APP_STATE.map.setView([APP_STATE.currentLocation.lat, APP_STATE.currentLocation.lng], 15);
+                            
+                            // Add marker for user location
+                            L.marker([APP_STATE.currentLocation.lat, APP_STATE.currentLocation.lng], {
+                                icon: L.divIcon({
+                                    html: `<div style="background: #2196F3; width: 40px; height: 40px; border-radius: 50%;
+                                           display: flex; align-items: center; justify-content: center; color: white;
+                                           border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                                           <i class="fas fa-user"></i></div>`,
+                                    className: 'user-marker',
+                                    iconSize: [40, 40]
+                                })
+                            }).addTo(APP_STATE.map).bindPopup('Your Location').openPopup();
+                        }
+                    },
+                    (error) => {
+                        console.error('Geolocation error:', error);
+                        showToast('Please enable location services for better experience', 'warning');
+                        hideLoading();
+                        
+                        // Default to Muzaffarabad center
+                        APP_STATE.currentLocation = { lat: 34.368, lng: 73.471 };
+                        document.getElementById('pickupLocation').value = "Muzaffarabad Center";
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                showToast('Geolocation not supported', 'error');
+                APP_STATE.currentLocation = { lat: 34.368, lng: 73.471 };
+            }
+        }
+
+        function useCurrentLocation() {
+            if (!APP_STATE.currentLocation) {
+                requestLocationPermission();
+            } else {
+                document.getElementById('pickupLocation').value = "Your Current Location";
+                showToast('Using your current location', 'success');
+            }
+        }
+
+        // ========== VEHICLE SELECTION ==========
+        function selectVehicle(type) {
+            APP_STATE.selectedVehicle = type;
+            
+            // Update UI
+            document.querySelectorAll('.vehicle-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        // ========== RIDE BOOKING SYSTEM ==========
+        function searchRiders() {
+            const destination = document.getElementById('destinationLocation').value;
+            
+            if (!destination) {
+                showToast('Please enter destination', 'error');
+                return;
+            }
+            
+            if (!APP_STATE.currentLocation) {
+                showToast('Please enable location services', 'error');
+                return;
+            }
+            
+            showLoading('Searching for available riders...');
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Find available riders
+                APP_STATE.availableRiders = APP_STATE.riders.filter(rider => 
+                    rider.status === 'online' && 
+                    rider.vehicleType === APP_STATE.selectedVehicle
+                );
+                
+                if (APP_STATE.availableRiders.length === 0) {
+                    showToast('No riders available at the moment', 'warning');
+                    hideLoading();
+                    return;
+                }
+                
+                // Create ride request
+                const rideRequest = {
+                    id: Date.now(),
+                    customer: APP_STATE.currentUser,
+                    pickup: APP_STATE.currentLocation,
+                    destination: destination,
+                    vehicleType: APP_STATE.selectedVehicle,
+                    status: 'pending',
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Store ride request
+                APP_STATE.rides.push(rideRequest);
+                saveData('rides');
+                
+                // Send notifications to riders
+                sendRideRequestToRiders(rideRequest);
+                
+                // Show offers section
+                document.getElementById('offersSection').style.display = 'block';
+                document.getElementById('offersContainer').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                        <p>Waiting for riders to send offers...</p>
+                    </div>
+                `;
+                
+                // Generate sample offers after 3 seconds
+                setTimeout(() => {
+                    generateSampleOffers(rideRequest);
+                }, 3000);
+                
+                showToast(`${APP_STATE.availableRiders.length} riders notified`, 'success');
+                hideLoading();
+            }, 1500);
+        }
+
+        function sendRideRequestToRiders(rideRequest) {
+            APP_STATE.availableRiders.forEach(rider => {
+                // Create notification
+                const notification = {
+                    id: Date.now() + Math.random(),
+                    type: 'ride_request',
+                    riderId: rider.id,
+                    message: `New ride request from ${rideRequest.customer.name}`,
+                    data: rideRequest,
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+                
+                APP_STATE.notifications.push(notification);
+            });
+            
+            saveData('notifications');
+            updateNotificationCount();
+        }
+
+        function generateSampleOffers(rideRequest) {
+            APP_STATE.rideOffers = [];
+            
+            APP_STATE.availableRiders.forEach((rider, index) => {
+                const offer = {
+                    id: Date.now() + index,
+                    requestId: rideRequest.id,
+                    riderId: rider.id,
+                    riderName: rider.name,
+                    riderPhone: rider.phone,
+                    riderRating: rider.rating,
+                    vehicleNumber: rider.vehicleNumber,
+                    vehicleType: rider.vehicleType,
+                    fare: rider.vehicleType === 'car' ? (300 + Math.floor(Math.random() * 200)) : (100 + Math.floor(Math.random() * 150)),
+                    estimatedTime: 10 + Math.floor(Math.random() * 20),
+                    pickup: rideRequest.pickup,
+                    destination: rideRequest.destination,
+                    status: 'pending',
+                    timestamp: new Date().toISOString()
+                };
+                APP_STATE.rideOffers.push(offer);
+                
+                // Add to offers container
+                displayOffer(offer);
+            });
+            
+            if (APP_STATE.rideOffers.length === 0) {
+                document.getElementById('offersContainer').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                        <p>No offers received yet. Please wait or try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayOffer(offer) {
+            const offersContainer = document.getElementById('offersContainer');
+            const existingContent = offersContainer.innerHTML;
+            
+            if (existingContent.includes('Waiting for riders')) {
+                offersContainer.innerHTML = '';
+            }
+            
+            const offerCard = document.createElement('div');
+            offerCard.className = 'offer-card';
+            offerCard.id = `offer-${offer.id}`;
+            offerCard.innerHTML = `
+                <div class="offer-header">
+                    <div class="rider-info">
+                        <div class="rider-avatar">${offer.riderName.charAt(0)}</div>
+                        <div>
+                            <h4 style="margin: 0;">${offer.riderName}</h4>
+                            <div class="rating-stars">
+                                ${generateStars(offer.riderRating)}
+                                <span style="margin-left: 5px; font-size: 0.9em;">${offer.riderRating}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="offer-price">Rs ${offer.fare}</div>
+                </div>
+                
+                <div class="offer-details">
+                    <p><i class="fas fa-clock"></i> Estimated Time: ${offer.estimatedTime} minutes</p>
+                    <p><i class="fas fa-${offer.vehicleType === 'car' ? 'car' : 'motorcycle'}"></i> Vehicle: ${offer.vehicleNumber}</p>
+                    <p><i class="fas fa-phone"></i> Phone: ${offer.riderPhone}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> From: Your Location</p>
+                    <p><i class="fas fa-flag-checkered"></i> To: ${offer.destination}</p>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-success" style="flex: 1;" onclick="acceptOffer(${offer.id})">
+                        <i class="fas fa-check"></i> Accept Offer
+                    </button>
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="viewRiderLocation('${offer.riderId}')">
+                        <i class="fas fa-map-marker-alt"></i> View Location
+                    </button>
+                </div>
+            `;
+            
+            offersContainer.appendChild(offerCard);
+        }
+
+        function generateStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            
+            for (let i = 1; i <= 5; i++) {
+                if (i <= fullStars) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i === fullStars + 1 && hasHalfStar) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            return stars;
+        }
+
+        function acceptOffer(offerId) {
+            const offer = APP_STATE.rideOffers.find(o => o.id === offerId);
+            if (!offer) return;
+            
+            const rider = APP_STATE.riders.find(r => r.id === offer.riderId);
+            if (!rider) return;
+            
+            // Create active ride
+            APP_STATE.currentRide = {
+                id: Date.now(),
+                offerId: offer.id,
+                customer: APP_STATE.currentUser,
+                rider: rider,
+                pickup: offer.pickup,
+                destination: offer.destination,
+                fare: offer.fare,
+                estimatedTime: offer.estimatedTime,
+                vehicleType: offer.vehicleType,
+                vehicleNumber: offer.vehicleNumber,
+                status: 'active',
+                startTime: new Date().toISOString()
+            };
+            
+            // Update ride status
+            const rideIndex = APP_STATE.rides.findIndex(r => r.id === offer.requestId);
+            if (rideIndex !== -1) {
+                APP_STATE.rides[rideIndex].status = 'active';
+                APP_STATE.rides[rideIndex].riderId = rider.id;
+                APP_STATE.rides[rideIndex].fare = offer.fare;
+                saveData('rides');
+            }
+            
+            // Send notification to rider
+            const notification = {
+                id: Date.now(),
+                type: 'offer_accepted',
+                riderId: rider.id,
+                message: `Your offer has been accepted by ${APP_STATE.currentUser.name}`,
+                data: APP_STATE.currentRide,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            APP_STATE.notifications.push(notification);
+            saveData('notifications');
+            
+            // Show active ride section
+            document.getElementById('activeRideSection').style.display = 'block';
+            document.getElementById('offersSection').style.display = 'none';
+            
+            // Update active ride details
+            updateActiveRideDetails();
+            
+            showToast('Ride confirmed! Rider has been notified.', 'success');
+            
+            // Update rider's notification count
+            updateNotificationCount();
+        }
+
+        function updateActiveRideDetails() {
+            if (!APP_STATE.currentRide) return;
+            
+            const container = document.getElementById('activeRideDetails');
+            container.innerHTML = `
+                <div class="ride-info-item">
+                    <small>Rider</small>
+                    <div>${APP_STATE.currentRide.rider.name}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Vehicle</small>
+                    <div>${APP_STATE.currentRide.vehicleNumber} (${APP_STATE.currentRide.vehicleType === 'car' ? 'Car' : 'Bike'})</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Fare</small>
+                    <div>Rs ${APP_STATE.currentRide.fare}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Estimated Time</small>
+                    <div>${APP_STATE.currentRide.estimatedTime} mins</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Pickup</small>
+                    <div>Your Location</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Destination</small>
+                    <div>${APP_STATE.currentRide.destination}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Rider Phone</small>
+                    <div>${APP_STATE.currentRide.rider.phone}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Status</small>
+                    <div style="color: var(--success);">Active</div>
+                </div>
+            `;
+        }
+
+        function cancelSearch() {
+            document.getElementById('offersSection').style.display = 'none';
+            APP_STATE.rideOffers = [];
+            showToast('Ride search cancelled', 'warning');
+        }
+
+        // ========== RIDER FUNCTIONS ==========
+        function toggleRiderStatus() {
+            const toggle = document.getElementById('riderStatusToggle');
+            const rider = APP_STATE.currentUser;
+            
+            if (toggle.checked) {
+                rider.status = 'online';
+                showToast('You are now online', 'success');
+                
+                // Check if live location is set
+                if (!rider.liveLocation) {
+                    showToast('Please share your live location to appear on maps', 'warning');
+                }
+            } else {
+                rider.status = 'offline';
+                rider.liveLocation = null;
+                showToast('You are now offline', 'warning');
+                
+                // Clear live location interval
+                if (APP_STATE.liveLocationInterval) {
+                    clearInterval(APP_STATE.liveLocationInterval);
+                    APP_STATE.liveLocationInterval = null;
+                }
+            }
+            
+            // Update in riders array
+            const riderIndex = APP_STATE.riders.findIndex(r => r.id === rider.id);
+            if (riderIndex !== -1) {
+                APP_STATE.riders[riderIndex] = rider;
+                saveData('riders');
+            }
+            
+            updateRiderStatusUI();
+            updateRiderMarkers();
+        }
+
+        function updateRiderStatusUI() {
+            const rider = APP_STATE.currentUser;
+            const statusText = document.getElementById('statusText');
+            const riderStatusText = document.getElementById('riderStatusText');
+            const toggle = document.getElementById('riderStatusToggle');
+            const indicator = document.getElementById('riderStatusIndicator');
+            
+            if (rider.status === 'online') {
+                statusText.textContent = 'Online';
+                riderStatusText.textContent = 'Online';
+                toggle.checked = true;
+                indicator.className = 'status-indicator status-online';
+                indicator.innerHTML = '<i class="fas fa-circle"></i> Online';
+            } else {
+                statusText.textContent = 'Offline';
+                riderStatusText.textContent = 'Offline';
+                toggle.checked = false;
+                indicator.className = 'status-indicator status-offline';
+                indicator.innerHTML = '<i class="fas fa-circle"></i> Offline';
+            }
+        }
+
+        function shareLiveLocation() {
+            const locationInput = document.getElementById('liveLocationInput').value;
+            
+            if (!locationInput) {
+                showToast('Please enter a location', 'error');
+                return;
+            }
+            
+            const rider = APP_STATE.currentUser;
+            
+            // Parse location (simplified - in real app, parse Google Maps link)
+            let location;
+            if (locationInput.includes('google.com') || locationInput.includes('maps')) {
+                // Extract coordinates from Google Maps link (simplified)
+                location = {
+                    lat: 34.368 + (Math.random() - 0.5) * 0.02,
+                    lng: 73.471 + (Math.random() - 0.5) * 0.02
+                };
+            } else {
+                // Use Muzaffarabad landmarks
+                const landmarks = {
+                    'bus stand': { lat: 34.368, lng: 73.471 },
+                    'university': { lat: 34.372, lng: 73.475 },
+                    'red fort': { lat: 34.370, lng: 73.480 },
+                    'neelum valley': { lat: 34.365, lng: 73.465 },
+                    'market': { lat: 34.369, lng: 73.473 },
+                    'hospital': { lat: 34.371, lng: 73.469 }
+                };
+                
+                const inputLower = locationInput.toLowerCase();
+                location = landmarks[inputLower] || { lat: 34.368, lng: 73.471 };
+            }
+            
+            rider.liveLocation = locationInput;
+            rider.location = location;
+            
+            // Update in riders array
+            const riderIndex = APP_STATE.riders.findIndex(r => r.id === rider.id);
+            if (riderIndex !== -1) {
+                APP_STATE.riders[riderIndex] = rider;
+                saveData('riders');
+            }
+            
+            // Show success
+            document.getElementById('locationShareStatus').style.display = 'flex';
+            showToast('Live location shared successfully', 'success');
+            
+            // Update rider status to online if not already
+            if (rider.status !== 'online') {
+                rider.status = 'online';
+                document.getElementById('riderStatusToggle').checked = true;
+                updateRiderStatusUI();
+            }
+            
+            // Update map markers
+            updateRiderMarkers();
+            
+            // Simulate location updates
+            if (APP_STATE.liveLocationInterval) {
+                clearInterval(APP_STATE.liveLocationInterval);
+            }
+            
+            APP_STATE.liveLocationInterval = setInterval(() => {
+                // Simulate small location changes
+                rider.location.lat += (Math.random() - 0.5) * 0.001;
+                rider.location.lng += (Math.random() - 0.5) * 0.001;
+                
+                const riderIndex = APP_STATE.riders.findIndex(r => r.id === rider.id);
+                if (riderIndex !== -1) {
+                    APP_STATE.riders[riderIndex] = rider;
+                    saveData('riders');
+                }
+                
+                updateRiderMarkers();
+            }, 30000);
+        }
+
+        function setShareDuration(hours) {
+            APP_STATE.shareDuration = hours;
+            
+            // Update UI
+            document.querySelectorAll('.duration-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            showToast(`Location will be shared for ${hours} hour${hours > 1 ? 's' : ''}`, 'info');
+        }
+
+        function loadRideRequests() {
+            const container = document.getElementById('requestsContainer');
+            container.innerHTML = '';
+            
+            const riderNotifications = APP_STATE.notifications.filter(
+                n => n.type === 'ride_request' && n.riderId === APP_STATE.currentUser.id && !n.read
+            );
+            
+            if (riderNotifications.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-bell-slash" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                        <p>No new ride requests</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            riderNotifications.forEach(notification => {
+                const request = notification.data;
+                const requestCard = createRideRequestCard(request, notification.id);
+                container.appendChild(requestCard);
+            });
+        }
+
+        function createRideRequestCard(request, notificationId) {
+            const div = document.createElement('div');
+            div.className = 'request-card';
+            div.innerHTML = `
+                <div class="request-header">
+                    <div class="customer-info">
+                        <div class="customer-avatar">${request.customer.name.charAt(0)}</div>
+                        <div>
+                            <h4 style="margin: 0;">${request.customer.name}</h4>
+                            <div style="font-size: 0.85rem; color: var(--gray);">${request.customer.phone}</div>
+                        </div>
+                    </div>
+                    <div class="offer-price">Rs ${request.vehicleType === 'car' ? '300+' : '100+'}</div>
+                </div>
+                
+                <div class="request-details">
+                    <p><i class="fas fa-map-marker-alt"></i> Pickup: Customer Location</p>
+                    <p><i class="fas fa-flag-checkered"></i> Destination: ${request.destination}</p>
+                    <p><i class="fas fa-${request.vehicleType === 'car' ? 'car' : 'motorcycle'}"></i> Vehicle: ${request.vehicleType === 'car' ? 'Car' : 'Bike'}</p>
+                </div>
+                
+                <div class="offer-form" style="margin-top: 15px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="number" class="form-input" placeholder="Your offer (Rs)" 
+                               id="offerAmount_${notificationId}" 
+                               value="${request.vehicleType === 'car' ? '350' : '120'}" min="50">
+                        <input type="number" class="form-input" placeholder="ETA (minutes)" 
+                               id="eta_${notificationId}" value="15" min="5" max="60">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" style="flex: 1;" onclick="sendOffer('${notificationId}')">
+                            <i class="fas fa-paper-plane"></i> Send Offer
+                        </button>
+                        <button class="btn btn-secondary" style="flex: 1;" onclick="declineRequest('${notificationId}')">
+                            <i class="fas fa-times"></i> Decline
+                        </button>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        function sendOffer(notificationId) {
+            const offerAmount = document.getElementById(`offerAmount_${notificationId}`).value;
+            const eta = document.getElementById(`eta_${notificationId}`).value;
+            
+            if (!offerAmount || !eta) {
+                showToast('Please enter offer amount and ETA', 'error');
+                return;
+            }
+            
+            if (offerAmount < 50) {
+                showToast('Minimum fare is Rs 50', 'error');
+                return;
+            }
+            
+            const notification = APP_STATE.notifications.find(n => n.id == notificationId);
+            if (!notification) return;
+            
+            const request = notification.data;
+            const rider = APP_STATE.currentUser;
+            
+            // Create ride offer
+            const rideOffer = {
+                id: Date.now(),
+                requestId: request.id,
+                customer: request.customer,
+                rider: rider,
+                pickup: request.pickup,
+                destination: request.destination,
+                vehicleType: request.vehicleType,
+                offerAmount: parseInt(offerAmount),
+                eta: parseInt(eta),
+                status: 'offer_sent',
+                timestamp: new Date().toISOString()
+            };
+            
+            // Add to rides array
+            APP_STATE.rides.push(rideOffer);
+            saveData('rides');
+            
+            // Mark notification as read
+            notification.read = true;
+            saveData('notifications');
+            
+            // Send notification to customer
+            const customerNotification = {
+                id: Date.now(),
+                type: 'ride_offer',
+                customerPhone: request.customer.phone,
+                message: `New offer from ${rider.name} for Rs ${offerAmount}`,
+                data: rideOffer,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            APP_STATE.notifications.push(customerNotification);
+            saveData('notifications');
+            
+            showToast('Offer sent to customer', 'success');
+            
+            // Reload requests
+            loadRideRequests();
+            updateNotificationCount();
+        }
+
+        function declineRequest(notificationId) {
+            const notification = APP_STATE.notifications.find(n => n.id == notificationId);
+            if (notification) {
+                notification.read = true;
+                saveData('notifications');
+                
+                showToast('Request declined', 'warning');
+                loadRideRequests();
+                updateNotificationCount();
+            }
+        }
+
+        // ========== RIDE MANAGEMENT ==========
+        function cancelRide(initiator) {
+            if (!APP_STATE.currentRide) return;
+            
+            if (confirm('Are you sure you want to cancel this ride?')) {
+                const ride = APP_STATE.currentRide;
+                
+                // Update ride status
+                const rideIndex = APP_STATE.rides.findIndex(r => r.id === ride.id);
+                if (rideIndex !== -1) {
+                    APP_STATE.rides[rideIndex].status = 'cancelled';
+                    APP_STATE.rides[rideIndex].endTime = new Date().toISOString();
+                    saveData('rides');
+                }
+                
+                // Send notification to other party
+                if (initiator === 'customer') {
+                    const notification = {
+                        id: Date.now(),
+                        type: 'ride_cancelled',
+                        riderId: ride.rider.id,
+                        message: `Ride cancelled by ${ride.customer.name}`,
+                        data: ride,
+                        timestamp: new Date().toISOString(),
+                        read: false
+                    };
+                    APP_STATE.notifications.push(notification);
+                } else {
+                    const notification = {
+                        id: Date.now(),
+                        type: 'ride_cancelled',
+                        customerPhone: ride.customer.phone,
+                        message: `Ride cancelled by rider ${ride.rider.name}`,
+                        data: ride,
+                        timestamp: new Date().toISOString(),
+                        read: false
+                    };
+                    APP_STATE.notifications.push(notification);
+                }
+                
+                saveData('notifications');
+                
+                // Reset current ride
+                APP_STATE.currentRide = null;
+                
+                // Hide active ride section
+                document.getElementById('activeRideSection').style.display = 'none';
+                document.getElementById('riderActiveRideSection').style.display = 'none';
+                
+                showToast('Ride cancelled', 'warning');
+                updateNotificationCount();
+            }
+        }
+
+        function completeRide() {
+            if (!APP_STATE.currentRide) return;
+            
+            if (confirm('Mark this ride as completed?')) {
+                const ride = APP_STATE.currentRide;
+                
+                // Update ride status
+                const rideIndex = APP_STATE.rides.findIndex(r => r.id === ride.id);
+                if (rideIndex !== -1) {
+                    APP_STATE.rides[rideIndex].status = 'completed';
+                    APP_STATE.rides[rideIndex].endTime = new Date().toISOString();
+                    saveData('rides');
+                }
+                
+                // Update rider earnings
+                const riderIndex = APP_STATE.riders.findIndex(r => r.id === ride.rider.id);
+                if (riderIndex !== -1) {
+                    APP_STATE.riders[riderIndex].totalRides += 1;
+                    APP_STATE.riders[riderIndex].earnings += ride.fare;
+                    saveData('riders');
+                }
+                
+                // Update customer ride count
+                const customerIndex = APP_STATE.customers.findIndex(c => c.phone === ride.customer.phone);
+                if (customerIndex !== -1) {
+                    APP_STATE.customers[customerIndex].totalRides += 1;
+                    saveData('customers');
+                }
+                
+                // Send notification to customer
+                const notification = {
+                    id: Date.now(),
+                    type: 'ride_completed',
+                    customerPhone: ride.customer.phone,
+                    message: `Ride completed with ${ride.rider.name}. Fare: Rs ${ride.fare}`,
+                    data: ride,
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+                APP_STATE.notifications.push(notification);
+                saveData('notifications');
+                
+                // Reset current ride
+                APP_STATE.currentRide = null;
+                
+                // Hide active ride section
+                document.getElementById('activeRideSection').style.display = 'none';
+                document.getElementById('riderActiveRideSection').style.display = 'none';
+                
+                showToast('Ride completed successfully!', 'success');
+                updateNotificationCount();
+                
+                // Show rating/complaint option
+                setTimeout(() => {
+                    openComplainModal();
+                }, 1000);
+            }
+        }
+
+        function checkActiveRide() {
+            if (APP_STATE.userRole === 'customer') {
+                const activeRide = APP_STATE.rides.find(r => 
+                    r.customer.phone === APP_STATE.currentUser.phone && 
+                    r.status === 'active'
+                );
+                
+                if (activeRide) {
+                    const rider = APP_STATE.riders.find(r => r.id === activeRide.riderId);
+                    if (rider) {
+                        APP_STATE.currentRide = {
+                            ...activeRide,
+                            rider: rider
+                        };
+                        document.getElementById('activeRideSection').style.display = 'block';
+                        updateActiveRideDetails();
+                    }
+                }
+            } else if (APP_STATE.userRole === 'rider') {
+                const activeRide = APP_STATE.rides.find(r => 
+                    r.riderId === APP_STATE.currentUser.id && 
+                    r.status === 'active'
+                );
+                
+                if (activeRide) {
+                    const customer = APP_STATE.customers.find(c => c.phone === activeRide.customer.phone);
+                    if (customer) {
+                        APP_STATE.currentRide = {
+                            ...activeRide,
+                            customer: customer
+                        };
+                        document.getElementById('riderActiveRideSection').style.display = 'block';
+                        updateRiderActiveRideDetails();
+                    }
+                }
+            }
+        }
+
+        function updateRiderActiveRideDetails() {
+            if (!APP_STATE.currentRide) return;
+            
+            const container = document.getElementById('riderActiveRideDetails');
+            container.innerHTML = `
+                <div class="ride-info-item">
+                    <small>Customer</small>
+                    <div>${APP_STATE.currentRide.customer.name}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Phone</small>
+                    <div>${APP_STATE.currentRide.customer.phone}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Fare</small>
+                    <div>Rs ${APP_STATE.currentRide.fare}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Destination</small>
+                    <div>${APP_STATE.currentRide.destination}</div>
+                </div>
+                <div class="ride-info-item">
+                    <small>Status</small>
+                    <div style="color: var(--success);">Active</div>
+                </div>
+            `;
+        }
+
+        // ========== ADMIN FUNCTIONS ==========
+        function loadAdminStats() {
+            // Calculate statistics
+            const totalCustomers = APP_STATE.customers.length;
+            const totalRides = APP_STATE.rides.length;
+            const activeRiders = APP_STATE.riders.filter(r => r.status === 'online').length;
+            const totalEarnings = APP_STATE.rides
+                .filter(r => r.status === 'completed')
+                .reduce((sum, ride) => sum + (ride.fare || 0), 0);
+            
+            // Today's data
+            const today = new Date().toISOString().split('T')[0];
+            const todayRides = APP_STATE.rides.filter(r => r.timestamp.split('T')[0] === today).length;
+            const todayEarnings = APP_STATE.rides
+                .filter(r => r.timestamp.split('T')[0] === today && r.status === 'completed')
+                .reduce((sum, ride) => sum + (ride.fare || 0), 0);
+            
+            // Update UI
+            document.getElementById('totalCustomers').textContent = totalCustomers;
+            document.getElementById('totalRides').textContent = totalRides;
+            document.getElementById('activeRiders').textContent = activeRiders;
+            document.getElementById('totalEarnings').textContent = 'Rs ' + totalEarnings;
+            
+            document.getElementById('customerChange').textContent = `+${APP_STATE.customers.length} Total`;
+            document.getElementById('rideChange').textContent = `+${todayRides} Today`;
+            document.getElementById('riderChange').textContent = `${activeRiders} Online`;
+            document.getElementById('earningChange').textContent = `+Rs ${todayEarnings} Today`;
+        }
+
+        function loadRidersTable() {
+            const table = document.getElementById('riderTable');
+            
+            if (APP_STATE.riders.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                            No riders added yet. Click "Add New Rider" to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            table.innerHTML = '';
+            
+            APP_STATE.riders.forEach(rider => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600; color: var(--primary);">${rider.id}</td>
+                    <td>${rider.name}</td>
+                    <td>${rider.phone}</td>
+                    <td>
+                        <span class="status-indicator ${rider.status === 'online' ? 'status-online' : 'status-offline'}">
+                            <i class="fas fa-circle"></i> ${rider.status}
+                        </span>
+                    </td>
+                    <td>${rider.vehicleNumber} (${rider.vehicleType})</td>
+                    <td>${rider.rating} ⭐</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteRider('${rider.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function loadRidesTable() {
+            const table = document.getElementById('ridesTable');
+            
+            if (APP_STATE.rides.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                            No rides completed yet.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            table.innerHTML = '';
+            
+            // Show recent 20 rides
+            const recentRides = APP_STATE.rides
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .slice(0, 20);
+            
+            recentRides.forEach(ride => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600; color: var(--primary);">R${ride.id.toString().slice(-6)}</td>
+                    <td>${ride.customer ? ride.customer.name : 'N/A'}</td>
+                    <td>${ride.riderId ? APP_STATE.riders.find(r => r.id === ride.riderId)?.name || 'N/A' : 'N/A'}</td>
+                    <td>${ride.pickup ? 'Location' : 'N/A'} → ${ride.destination}</td>
+                    <td>Rs ${ride.fare || 'N/A'}</td>
+                    <td>
+                        <span class="status-indicator ${ride.status === 'completed' ? 'status-completed' : 
+                            ride.status === 'active' ? 'status-online' : 'status-pending'}">
+                            ${ride.status}
+                        </span>
+                    </td>
+                    <td>${new Date(ride.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function loadComplaintsTable() {
+            const table = document.getElementById('complaintsTable');
+            
+            if (APP_STATE.complaints.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                            No complaints yet.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            table.innerHTML = '';
+            
+            APP_STATE.complaints.forEach(complaint => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600; color: var(--primary);">C${complaint.id.toString().slice(-6)}</td>
+                    <td>${complaint.customerName}</td>
+                    <td>${complaint.riderName}</td>
+                    <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${complaint.details}
+                    </td>
+                    <td>${'★'.repeat(complaint.rating)}${'☆'.repeat(5-complaint.rating)}</td>
+                    <td>
+                        <span class="status-indicator ${complaint.resolved ? 'status-completed' : 'status-pending'}">
+                            ${complaint.resolved ? 'Resolved' : 'Pending'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" onclick="resolveComplaint(${complaint.id})">
+                                ${complaint.resolved ? 'Reopen' : 'Resolve'}
+                            </button>
+                        </div>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function loadAdminList() {
+            const container = document.getElementById('adminList');
+            container.innerHTML = '';
+            
+            APP_STATE.admins.forEach(admin => {
+                const adminDiv = document.createElement('div');
+                adminDiv.style.cssText = 'background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--light-gray);';
+                adminDiv.innerHTML = `
+                    <div style="font-weight: 600; color: var(--primary);">${admin.name}</div>
+                    <div style="font-size: 0.85rem; color: var(--gray);">
+                        ${admin.isPrimary ? 'Primary Admin' : 'Admin'}
+                    </div>
+                    ${!admin.isPrimary ? `
+                    <button class="btn btn-danger btn-sm" onclick="removeAdmin('${admin.name}')" 
+                            style="margin-top: 10px; padding: 5px 10px; font-size: 0.8rem;">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                    ` : ''}
+                `;
+                container.appendChild(adminDiv);
+            });
+        }
+
+        function openAddRiderModal() {
+            generateRiderId();
+            document.getElementById('addRiderModal').style.display = 'flex';
+        }
+
+        function generateRiderId() {
+            const riderId = Math.floor(10000 + Math.random() * 90000).toString();
+            document.getElementById('newRiderId').value = riderId;
+        }
+
+        function addNewRider() {
+            const name = document.getElementById('newRiderName').value;
+            const phone = document.getElementById('newRiderPhone').value;
+            const vehicleType = document.getElementById('newRiderVehicle').value;
+            const vehicleNumber = document.getElementById('newRiderVehicleNo').value;
+            const riderId = document.getElementById('newRiderId').value;
+            const password = document.getElementById('newRiderPassword').value;
+            
+            if (!name || !phone || !vehicleNumber || !riderId || !password) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+            
+            // Check if rider ID already exists
+            const existingRider = APP_STATE.riders.find(r => r.id === riderId);
+            if (existingRider) {
+                showToast('Rider ID already exists. Please generate a new one.', 'error');
+                generateRiderId();
+                return;
+            }
+            
+            const newRider = {
+                id: riderId,
+                name,
+                phone,
+                password,
+                status: 'offline',
+                rating: 5.0,
+                totalRides: 0,
+                vehicleType,
+                vehicleNumber,
+                location: { lat: 34.368, lng: 73.471 },
+                liveLocation: null,
+                earnings: 0,
+                joinedDate: new Date().toISOString().split('T')[0]
+            };
+            
+            APP_STATE.riders.push(newRider);
+            saveData('riders');
+            
+            showToast('Rider added successfully', 'success');
+            closeModal('addRiderModal');
+            loadRidersTable();
+            loadAdminStats();
+            
+            // Clear form
+            document.getElementById('newRiderName').value = '';
+            document.getElementById('newRiderPhone').value = '';
+            document.getElementById('newRiderVehicleNo').value = '';
+            document.getElementById('newRiderPassword').value = '';
+        }
+
+        function deleteRider(riderId) {
+            if (confirm('Are you sure you want to delete this rider?')) {
+                APP_STATE.riders = APP_STATE.riders.filter(r => r.id !== riderId);
+                saveData('riders');
+                
+                showToast('Rider deleted', 'success');
+                loadRidersTable();
+                loadAdminStats();
+            }
+        }
+
+        function openAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'flex';
+        }
+
+        function addNewAdmin() {
+            const name = document.getElementById('newAdminName').value;
+            const password = document.getElementById('newAdminPassword').value;
+            const confirmPassword = document.getElementById('newAdminConfirmPassword').value;
+            
+            if (!name || !password || !confirmPassword) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+            
+            // Check if admin already exists
+            const existingAdmin = APP_STATE.admins.find(a => a.name === name);
+            if (existingAdmin) {
+                showToast('Admin already exists', 'error');
+                return;
+            }
+            
+            const newAdmin = {
+                name,
+                password,
+                isPrimary: false
+            };
+            
+            APP_STATE.admins.push(newAdmin);
+            saveData('admins');
+            
+            showToast('Admin added successfully', 'success');
+            closeModal('addAdminModal');
+            loadAdminList();
+        }
+
+        function removeAdmin(adminName) {
+            if (confirm('Are you sure you want to remove this admin?')) {
+                APP_STATE.admins = APP_STATE.admins.filter(a => a.name !== adminName);
+                saveData('admins');
+                
+                showToast('Admin removed', 'success');
+                loadAdminList();
+            }
+        }
+
+        // ========== COMPLAINTS ==========
+        function openComplainModal() {
+            // Populate riders dropdown
+            const select = document.getElementById('complainRider');
+            select.innerHTML = '<option value="">Select a rider</option>';
+            
+            APP_STATE.riders.forEach(rider => {
+                const option = document.createElement('option');
+                option.value = rider.id;
+                option.textContent = `${rider.name} (${rider.vehicleNumber})`;
+                select.appendChild(option);
+            });
+            
+            // Set default rider if there's a recent ride
+            if (APP_STATE.currentRide) {
+                select.value = APP_STATE.currentRide.rider.id;
+            }
+            
+            document.getElementById('complainModal').style.display = 'flex';
+            
+            // Initialize rating stars
+            document.querySelectorAll('.rating-star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    document.getElementById('complainRating').value = rating;
+                    
+                    // Update stars display
+                    document.querySelectorAll('.rating-star').forEach((s, index) => {
+                        if (index < rating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        }
+
+        function submitComplaint() {
+            const email = document.getElementById('complainEmail').value;
+            const riderId = document.getElementById('complainRider').value;
+            const rating = parseInt(document.getElementById('complainRating').value);
+            const details = document.getElementById('complainDetails').value;
+            
+            if (!email || !riderId || rating === 0 || !details) {
+                showToast('Please fill all fields and select a rating', 'error');
+                return;
+            }
+            
+            const rider = APP_STATE.riders.find(r => r.id === riderId);
+            
+            const complaint = {
+                id: Date.now(),
+                customerName: APP_STATE.currentUser.name,
+                customerEmail: email,
+                riderId,
+                riderName: rider ? rider.name : 'Unknown',
+                rating,
+                details,
+                resolved: false,
+                timestamp: new Date().toISOString()
+            };
+            
+            APP_STATE.complaints.push(complaint);
+            saveData('complaints');
+            
+            // Send notification to admin
+            const notification = {
+                id: Date.now(),
+                type: 'complaint',
+                admin: true,
+                message: `New complaint from ${APP_STATE.currentUser.name}`,
+                data: complaint,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            APP_STATE.notifications.push(notification);
+            saveData('notifications');
+            
+            showToast('Complaint submitted successfully', 'success');
+            closeModal('complainModal');
+        }
+
+        function resolveComplaint(complaintId) {
+            const complaint = APP_STATE.complaints.find(c => c.id === complaintId);
+            if (complaint) {
+                complaint.resolved = !complaint.resolved;
+                saveData('complaints');
+                loadComplaintsTable();
+                showToast(`Complaint ${complaint.resolved ? 'resolved' : 'reopened'}`, 'success');
+            }
+        }
+
+        // ========== NOTIFICATIONS ==========
+        function updateNotificationCount() {
+            let count = 0;
+            
+            if (APP_STATE.userRole === 'customer') {
+                count = APP_STATE.notifications.filter(n => 
+                    n.customerPhone === APP_STATE.currentUser.phone && !n.read
+                ).length;
+                document.getElementById('notificationCount').textContent = count;
+            } else if (APP_STATE.userRole === 'rider') {
+                count = APP_STATE.notifications.filter(n => 
+                    n.riderId === APP_STATE.currentUser.id && !n.read
+                ).length;
+                document.getElementById('riderNotificationCount').textContent = count;
+            } else if (APP_STATE.userRole === 'admin') {
+                count = APP_STATE.notifications.filter(n => 
+                    n.admin && !n.read
+                ).length;
+            }
+        }
+
+        function showNotifications() {
+            const modal = document.getElementById('notificationModal');
+            const list = document.getElementById('notificationList');
+            list.innerHTML = '';
+            
+            let userNotifications = [];
+            
+            if (APP_STATE.userRole === 'customer') {
+                userNotifications = APP_STATE.notifications.filter(n => 
+                    n.customerPhone === APP_STATE.currentUser.phone
+                ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                 .slice(0, 20);
+            } else if (APP_STATE.userRole === 'rider') {
+                userNotifications = APP_STATE.notifications.filter(n => 
+                    n.riderId === APP_STATE.currentUser.id
+                ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                 .slice(0, 20);
+            } else if (APP_STATE.userRole === 'admin') {
+                userNotifications = APP_STATE.notifications.filter(n => n.admin)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .slice(0, 20);
+            }
+            
+            if (userNotifications.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-bell-slash" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                        <p>No notifications</p>
+                    </div>
+                `;
+            } else {
+                userNotifications.forEach(notification => {
+                    const div = document.createElement('div');
+                    div.className = 'notification-item';
+                    div.style.cssText = 'padding: 15px; border-bottom: 1px solid var(--light-gray); cursor: pointer;';
+                    div.style.backgroundColor = notification.read ? 'transparent' : 'rgba(46, 125, 50, 0.05)';
+                    
+                    const typeIcon = {
+                        'ride_request': 'fas fa-bell',
+                        'ride_offer': 'fas fa-tag',
+                        'offer_accepted': 'fas fa-check-circle',
+                        'ride_cancelled': 'fas fa-times-circle',
+                        'ride_completed': 'fas fa-check',
+                        'complaint': 'fas fa-exclamation-triangle'
+                    }[notification.type] || 'fas fa-info-circle';
+                    
+                    div.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <i class="${typeIcon}" style="color: var(--primary);"></i>
+                            <div style="font-weight: 600; color: var(--primary); text-transform: capitalize;">
+                                ${notification.type.replace('_', ' ')}
+                            </div>
+                        </div>
+                        <div style="margin: 5px 0; font-size: 0.95rem;">${notification.message}</div>
+                        <div style="font-size: 0.8rem; color: var(--gray);">
+                            ${new Date(notification.timestamp).toLocaleString()}
+                        </div>
+                    `;
+                    
+                    list.appendChild(div);
+                    
+                    // Mark as read on click
+                    div.addEventListener('click', () => {
+                        notification.read = true;
+                        saveData('notifications');
+                        updateNotificationCount();
+                        modal.style.display = 'none';
+                    });
+                });
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // ========== UTILITY FUNCTIONS ==========
+        function showLoading(text = 'Loading...') {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'flex';
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'flex';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function logout() {
+            // If rider is online, go offline
+            if (APP_STATE.userRole === 'rider' && APP_STATE.currentUser.status === 'online') {
+                APP_STATE.currentUser.status = 'offline';
+                APP_STATE.currentUser.liveLocation = null;
+                
+                // Update in array
+                const riderIndex = APP_STATE.riders.findIndex(r => r.id === APP_STATE.currentUser.id);
+                if (riderIndex !== -1) {
+                    APP_STATE.riders[riderIndex] = APP_STATE.currentUser;
+                    saveData('riders');
+                }
+                
+                // Clear interval
+                if (APP_STATE.liveLocationInterval) {
+                    clearInterval(APP_STATE.liveLocationInterval);
+                    APP_STATE.liveLocationInterval = null;
+                }
+            }
+            
+            // Reset state
+            APP_STATE.currentUser = null;
+            APP_STATE.userRole = null;
+            APP_STATE.currentRide = null;
+            APP_STATE.currentStep = 1;
+            
+            showToast('Logged out successfully', 'success');
+            showWelcomeScreen();
+        }
+
+        function selectRiderFromMap(riderId) {
+            const rider = APP_STATE.riders.find(r => r.id === riderId);
+            if (rider) {
+                showToast(`Selected ${rider.name}. Send a ride request?`, 'info');
+                // In a real app, this would trigger a ride request to this specific rider
+            }
+        }
+
+        function viewRiderLocation(riderId) {
+            const rider = APP_STATE.riders.find(r => r.id === riderId);
+            if (rider && rider.location) {
+                APP_STATE.map.setView([rider.location.lat, rider.location.lng], 16);
+                showToast(`Showing location of ${rider.name}`, 'info');
+            }
+        }
+
+        // ========== INITIALIZE APP ==========
+        window.onload = initApp;
+
+        // ========== EXPORT/IMPORT DATA FUNCTIONS (For Admin) ==========
+        function exportData() {
+            const data = {
+                customers: APP_STATE.customers,
+                riders: APP_STATE.riders,
+                rides: APP_STATE.rides,
+                complaints: APP_STATE.complaints,
+                admins: APP_STATE.admins,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `land-riders-backup-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('Data exported successfully', 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('This will replace all current data. Continue?')) {
+                        APP_STATE.customers = data.customers || [];
+                        APP_STATE.riders = data.riders || [];
+                        APP_STATE.rides = data.rides || [];
+                        APP_STATE.complaints = data.complaints || [];
+                        APP_STATE.admins = data.admins || [];
+                        
+                        // Save all data
+                        saveData('customers');
+                        saveData('riders');
+                        saveData('rides');
+                        saveData('complaints');
+                        saveData('admins');
+                        
+                        showToast('Data imported successfully', 'success');
+                        
+                        // Reload admin dashboard if admin is logged in
+                        if (APP_STATE.userRole === 'admin') {
+                            loadAdminStats();
+                            loadRidersTable();
+                            loadRidesTable();
+                            loadComplaintsTable();
+                            loadAdminList();
+                        }
+                    }
+                } catch (error) {
+                    showToast('Invalid data file', 'error');
+                    console.error('Import error:', error);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // ========== FOR DEMO PURPOSES ==========
+        // Add export/import buttons to admin dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for admin dashboard to load
+            setTimeout(() => {
+                const adminSection = document.querySelector('.admin-section');
+                if (adminSection) {
+                    const exportDiv = document.createElement('div');
+                    exportDiv.style.cssText = 'margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--light-gray);';
+                    exportDiv.innerHTML = `
+                        <h4 style="margin-bottom: 15px; color: var(--primary);">
+                            <i class="fas fa-database"></i> Data Management
+                        </h4>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="exportData()">
+                                <i class="fas fa-download"></i> Export Data
+                            </button>
+                            <label class="btn btn-secondary" style="cursor: pointer;">
+                                <i class="fas fa-upload"></i> Import Data
+                                <input type="file" accept=".json" style="display: none;" onchange="importData(event)">
+                            </label>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--gray); margin-top: 10px;">
+                            Backup your data regularly to prevent loss.
+                        </p>
+                    `;
+                    adminSection.appendChild(exportDiv);
+                }
+            }, 1000);
+        });
+
+    </script>
+</body>
+</html>
