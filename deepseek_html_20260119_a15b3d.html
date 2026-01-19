@@ -1,0 +1,2818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - THE LAND RIDERS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2E7D32;
+            --light-green: #4CAF50;
+            --yellow: #FFD600;
+            --white: #FFFFFF;
+            --black: #212121;
+            --gray: #757575;
+            --light-gray: #f5f5f5;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --blue: #2196F3;
+            --purple: #9C27B0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--black);
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .app-header {
+            background: linear-gradient(to right, var(--primary-green), var(--light-green));
+            color: var(--white);
+            padding: 1.2rem 1.5rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+            margin-right: 10px;
+            color: var(--yellow);
+        }
+        
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+        
+        .admin-badge {
+            background-color: var(--yellow);
+            color: var(--black);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .header-right {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: var(--white);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        /* Auth Screens */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 70vh;
+        }
+        
+        .auth-box {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--yellow);
+        }
+        
+        .auth-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-green);
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--black);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: var(--light-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        
+        .btn {
+            display: block;
+            background: linear-gradient(to right, var(--primary-green), var(--light-green));
+            color: var(--white);
+            padding: 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+        }
+        
+        .btn-yellow {
+            background: linear-gradient(to right, var(--yellow), #FFC107);
+            color: var(--black);
+        }
+        
+        .btn-blue {
+            background: linear-gradient(to right, var(--blue), #2196F3);
+            color: var(--white);
+        }
+        
+        .btn-purple {
+            background: linear-gradient(to right, var(--purple), #9C27B0);
+            color: var(--white);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, var(--danger), #f44336);
+            color: var(--white);
+        }
+        
+        /* Dashboard */
+        .admin-dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            cursor: pointer;
+            border-top: 4px solid transparent;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-riders { border-color: var(--primary-green); }
+        .card-customers { border-color: var(--blue); }
+        .card-rides { border-color: var(--warning); }
+        .card-complaints { border-color: var(--danger); }
+        .card-cancelled { border-color: var(--gray); }
+        .card-admins { border-color: var(--purple); }
+        .card-requests { border-color: #FF5722; }
+        .card-active { border-color: #00BCD4; }
+        
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            color: inherit;
+        }
+        
+        .card-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        /* Sections */
+        .section-container {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th {
+            background-color: var(--light-gray);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--black);
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:hover {
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background-color: #E8F5E9;
+            color: var(--primary-green);
+        }
+        
+        .status-pending {
+            background-color: #FFF8E1;
+            color: var(--warning);
+        }
+        
+        .status-approved {
+            background-color: #E3F2FD;
+            color: var(--blue);
+        }
+        
+        .status-rejected {
+            background-color: #FFEBEE;
+            color: var(--danger);
+        }
+        
+        .status-completed {
+            background-color: #E8F5E9;
+            color: var(--primary-green);
+        }
+        
+        .status-cancelled {
+            background-color: #F5F5F5;
+            color: var(--gray);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            color: var(--primary-green);
+        }
+        
+        .close-modal {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            color: var(--primary-green);
+            border-bottom-color: var(--primary-green);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Stats Overview */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        /* Search Bar */
+        .search-bar {
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        /* Footer */
+        .app-footer {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .admin-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header" id="appHeader">
+            <!-- Header loaded dynamically -->
+        </header>
+        
+        <main class="main-content" id="mainContent">
+            <!-- Content loaded dynamically -->
+        </main>
+        
+        <footer class="app-footer">
+            <p>© 2024 THE LAND RIDERS. All rights reserved.</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.9;">Admin Panel v1.0 | Contact: 0301-3036146</p>
+        </footer>
+    </div>
+    
+    <!-- Modals -->
+    <div class="modal" id="addRiderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Rider</h3>
+                <span class="close-modal" id="closeRiderModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rider Name</label>
+                <input type="text" class="form-input" id="riderName" placeholder="Enter rider's full name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" id="riderPhone" placeholder="03XX-XXXXXXX" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Vehicle Type</label>
+                <select class="form-input" id="riderVehicle">
+                    <option value="motorcycle">Motorcycle</option>
+                    <option value="car">Car</option>
+                    <option value="auto">Auto Rickshaw</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Vehicle Plate Number</label>
+                <input type="text" class="form-input" id="riderPlate" placeholder="AJK-XXXX" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">WhatsApp Number</label>
+                <input type="tel" class="form-input" id="riderWhatsapp" placeholder="03XX-XXXXXXX">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Set Password</label>
+                <input type="text" class="form-input" id="riderPassword" value="landrider123" required>
+            </div>
+            <button class="btn" id="saveRiderBtn">Save Rider</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Admin</h3>
+                <span class="close-modal" id="closeAdminModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Admin Name</label>
+                <input type="text" class="form-input" id="adminName" placeholder="Enter admin name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-input" id="adminUsername" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" id="adminPassword" placeholder="Set a strong password" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" class="form-input" id="adminConfirmPassword" placeholder="Confirm password" required>
+            </div>
+            <button class="btn" id="saveAdminBtn">Create Admin Account</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="complaintDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Complaint Details</h3>
+                <span class="close-modal" id="closeComplaintModal">&times;</span>
+            </div>
+            <div id="complaintDetailsContent"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="rideDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Ride Details</h3>
+                <span class="close-modal" id="closeRideModal">&times;</span>
+            </div>
+            <div id="rideDetailsContent"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="sendMessageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Send Message</h3>
+                <span class="close-modal" id="closeMessageModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Recipient</label>
+                <input type="text" class="form-input" id="messageRecipient" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Message Type</label>
+                <select class="form-input" id="messageType">
+                    <option value="email">Email</option>
+                    <option value="sms">SMS</option>
+                    <option value="whatsapp">WhatsApp</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea class="form-input" id="messageContent" rows="4" placeholder="Type your message here..." required></textarea>
+            </div>
+            <button class="btn" id="sendMessageBtn">Send Message</button>
+        </div>
+    </div>
+
+    <script>
+        // Database Service
+        class DatabaseService {
+            static getCustomers() {
+                return JSON.parse(localStorage.getItem('customers')) || [];
+            }
+            
+            static saveCustomers(customers) {
+                localStorage.setItem('customers', JSON.stringify(customers));
+            }
+            
+            static getRiders() {
+                return JSON.parse(localStorage.getItem('riders')) || [];
+            }
+            
+            static saveRiders(riders) {
+                localStorage.setItem('riders', JSON.stringify(riders));
+            }
+            
+            static getRides() {
+                return JSON.parse(localStorage.getItem('rides')) || [];
+            }
+            
+            static saveRides(rides) {
+                localStorage.setItem('rides', JSON.stringify(rides));
+            }
+            
+            static getComplaints() {
+                return JSON.parse(localStorage.getItem('complaints')) || [];
+            }
+            
+            static saveComplaints(complaints) {
+                localStorage.setItem('complaints', JSON.stringify(complaints));
+            }
+            
+            static getCancelledRides() {
+                return JSON.parse(localStorage.getItem('cancelledRides')) || [];
+            }
+            
+            static saveCancelledRides(cancelledRides) {
+                localStorage.setItem('cancelledRides', JSON.stringify(cancelledRides));
+            }
+            
+            static getActiveRideRequests() {
+                return JSON.parse(localStorage.getItem('activeRideRequests')) || [];
+            }
+            
+            static saveActiveRideRequests(requests) {
+                localStorage.setItem('activeRideRequests', JSON.stringify(requests));
+            }
+            
+            static getActiveOffers() {
+                return JSON.parse(localStorage.getItem('activeOffers')) || [];
+            }
+            
+            static saveActiveOffers(offers) {
+                localStorage.setItem('activeOffers', JSON.stringify(offers));
+            }
+            
+            static getAdmins() {
+                return JSON.parse(localStorage.getItem('admins')) || [
+                    { username: 'safeer', password: 'safeer786', name: 'Safeer Admin' }
+                ];
+            }
+            
+            static saveAdmins(admins) {
+                localStorage.setItem('admins', JSON.stringify(admins));
+            }
+        }
+
+        // WebSocket Service
+        class WebSocketService {
+            static instance = null;
+            static callbacks = {
+                onNewComplaint: [],
+                onNewRideRequest: [],
+                onRideCompleted: [],
+                onRideCancelled: [],
+                onNewRiderRegistered: []
+            };
+
+            static connect() {
+                if (this.instance) return this.instance;
+
+                this.instance = {
+                    emit: (event, data) => {
+                        console.log('Admin emitting:', event, data);
+                    },
+                    
+                    on: (event, callback) => {
+                        if (!this.callbacks[event]) this.callbacks[event] = [];
+                        this.callbacks[event].push(callback);
+                    }
+                };
+
+                // Listen for storage events from customer/rider app
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'complaints') {
+                        const complaints = JSON.parse(e.newValue || '[]');
+                        const latestComplaint = complaints[complaints.length - 1];
+                        if (latestComplaint) {
+                            this.callbacks.onNewComplaint.forEach(cb => cb(latestComplaint));
+                        }
+                    }
+                    if (e.key === 'activeRideRequests') {
+                        const requests = JSON.parse(e.newValue || '[]');
+                        const latestRequest = requests[requests.length - 1];
+                        if (latestRequest) {
+                            this.callbacks.onNewRideRequest.forEach(cb => cb(latestRequest));
+                        }
+                    }
+                    if (e.key === 'rides') {
+                        const rides = JSON.parse(e.newValue || '[]');
+                        const latestRide = rides[rides.length - 1];
+                        if (latestRide && latestRide.status === 'completed') {
+                            this.callbacks.onRideCompleted.forEach(cb => cb(latestRide));
+                        }
+                    }
+                    if (e.key === 'cancelledRides') {
+                        const cancelledRides = JSON.parse(e.newValue || '[]');
+                        const latestCancelled = cancelledRides[cancelledRides.length - 1];
+                        if (latestCancelled) {
+                            this.callbacks.onRideCancelled.forEach(cb => cb(latestCancelled));
+                        }
+                    }
+                    if (e.key === 'riders') {
+                        const riders = JSON.parse(e.newValue || '[]');
+                        const latestRider = riders[riders.length - 1];
+                        if (latestRider) {
+                            this.callbacks.onNewRiderRegistered.forEach(cb => cb(latestRider));
+                        }
+                    }
+                });
+
+                return this.instance;
+            }
+        }
+
+        // Admin Application
+        class AdminApp {
+            constructor() {
+                this.currentAdmin = null;
+                this.socket = null;
+                this.init();
+            }
+
+            init() {
+                this.checkAuth();
+                this.setupWebSocket();
+                this.setupEventListeners();
+            }
+
+            updateHeader() {
+                const header = document.getElementById('appHeader');
+                if (this.currentAdmin) {
+                    header.innerHTML = `
+                        <div class="logo-container">
+                            <i class="fas fa-crown logo-icon"></i>
+                            <h1 class="logo-text">THE LAND RIDERS</h1>
+                        </div>
+                        <div class="admin-badge">ADMIN PANEL</div>
+                        <div class="header-right">
+                            <button class="logout-btn" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    `;
+                    
+                    document.getElementById('logoutBtn').addEventListener('click', () => {
+                        this.logout();
+                    });
+                } else {
+                    header.innerHTML = `
+                        <div class="logo-container">
+                            <i class="fas fa-crown logo-icon"></i>
+                            <h1 class="logo-text">THE LAND RIDERS</h1>
+                        </div>
+                        <div class="admin-badge">ADMIN PANEL</div>
+                    `;
+                }
+            }
+
+            checkAuth() {
+                const adminData = localStorage.getItem('adminData');
+                if (adminData) {
+                    this.currentAdmin = JSON.parse(adminData);
+                    this.showDashboard();
+                } else {
+                    this.showLogin();
+                }
+            }
+
+            showLogin() {
+                this.updateHeader();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="auth-container">
+                        <div class="auth-box">
+                            <h2 class="auth-title">Admin Login</h2>
+                            <p style="text-align: center; color: var(--gray); margin-bottom: 1.5rem;">
+                                Enter admin credentials to continue
+                            </p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" id="adminUsername" 
+                                       placeholder="Enter username" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-input" id="adminPassword" 
+                                       placeholder="••••••••" required>
+                            </div>
+                            
+                            <button class="btn" id="loginBtn">Login</button>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('loginBtn').addEventListener('click', () => {
+                    this.handleLogin();
+                });
+
+                // Set default credentials
+                document.getElementById('adminUsername').value = 'safeer';
+                document.getElementById('adminPassword').value = 'safeer786';
+            }
+
+            handleLogin() {
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+
+                const admins = DatabaseService.getAdmins();
+                const admin = admins.find(a => a.username === username && a.password === password);
+
+                if (admin) {
+                    this.currentAdmin = admin;
+                    localStorage.setItem('adminData', JSON.stringify(admin));
+                    this.showDashboard();
+                    this.showNotification('Login successful!', 'success');
+                } else {
+                    this.showNotification('Invalid admin credentials!', 'error');
+                }
+            }
+
+            showDashboard() {
+                this.updateHeader();
+                
+                const customers = DatabaseService.getCustomers();
+                const riders = DatabaseService.getRiders();
+                const rides = DatabaseService.getRides();
+                const complaints = DatabaseService.getComplaints();
+                const cancelledRides = DatabaseService.getCancelledRides();
+                const activeRequests = DatabaseService.getActiveRideRequests();
+                const activeRides = rides.filter(ride => ride.status === 'active');
+
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                            </h2>
+                            <div style="color: var(--gray); font-size: 0.9rem;">
+                                Welcome, ${this.currentAdmin.name}
+                            </div>
+                        </div>
+                        
+                        <div class="admin-dashboard">
+                            <div class="dashboard-card card-riders" onclick="adminApp.showRiders()">
+                                <i class="fas fa-motorcycle card-icon"></i>
+                                <div class="card-number">${riders.length}</div>
+                                <div class="card-label">Riders</div>
+                            </div>
+                            
+                            <div class="dashboard-card card-customers" onclick="adminApp.showCustomers()">
+                                <i class="fas fa-users card-icon"></i>
+                                <div class="card-number">${customers.length}</div>
+                                <div class="card-label">Customers</div>
+                            </div>
+                            
+                            <div class="dashboard-card card-rides" onclick="adminApp.showRides()">
+                                <i class="fas fa-road card-icon"></i>
+                                <div class="card-number">${rides.length}</div>
+                                <div class="card-label">Total Rides</div>
+                            </div>
+                            
+                            <div class="dashboard-card card-complaints" onclick="adminApp.showComplaints()">
+                                <i class="fas fa-exclamation-triangle card-icon"></i>
+                                <div class="card-number">${complaints.length}</div>
+                                <div class="card-label">Complaints</div>
+                                ${complaints.filter(c => c.status === 'pending').length > 0 ? `
+                                    <div class="notification-badge">${complaints.filter(c => c.status === 'pending').length}</div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="dashboard-card card-cancelled" onclick="adminApp.showCancelledRides()">
+                                <i class="fas fa-ban card-icon"></i>
+                                <div class="card-number">${cancelledRides.length}</div>
+                                <div class="card-label">Cancelled Rides</div>
+                            </div>
+                            
+                            <div class="dashboard-card card-requests" onclick="adminApp.showActiveRequests()">
+                                <i class="fas fa-bell card-icon"></i>
+                                <div class="card-number">${activeRequests.length}</div>
+                                <div class="card-label">Active Requests</div>
+                            </div>
+                            
+                            <div class="dashboard-card card-active" onclick="adminApp.showActiveRides()">
+                                <i class="fas fa-car card-icon"></i>
+                                <div class="card-number">${activeRides.length}</div>
+                                <div class="card-label">Active Rides</div>
+                            </div>
+                            
+                            <div class="dashboard-card card-admins" onclick="adminApp.showAdmins()">
+                                <i class="fas fa-user-shield card-icon"></i>
+                                <div class="card-number">${DatabaseService.getAdmins().length}</div>
+                                <div class="card-label">Admins</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-line"></i> Today's Overview
+                            </h2>
+                            <span style="color: var(--gray); font-size: 0.9rem;">
+                                ${new Date().toLocaleDateString()}
+                            </span>
+                        </div>
+                        
+                        <div class="stats-overview">
+                            <div class="stat-item">
+                                <div class="stat-value">${this.getTodayRides(rides)}</div>
+                                <div class="stat-label">Rides Today</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">PKR ${this.getTodayEarnings(rides)}</div>
+                                <div class="stat-label">Earnings Today</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${this.getActiveRiders(riders)}</div>
+                                <div class="stat-label">Active Riders</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${this.getNewCustomers(customers)}</div>
+                                <div class="stat-label">New Customers</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-cog"></i> Quick Actions
+                            </h2>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <button class="btn btn-yellow" onclick="adminApp.showAddRiderModal()">
+                                <i class="fas fa-plus"></i> Add Rider
+                            </button>
+                            <button class="btn btn-blue" onclick="adminApp.showAddAdminModal()">
+                                <i class="fas fa-user-plus"></i> Add Admin
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-history"></i> Recent Activities
+                            </h2>
+                        </div>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            ${this.getRecentActivities().length > 0 ? 
+                                this.getRecentActivities().map(activity => `
+                                    <div style="padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem;">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="font-weight: 600;">${activity.title}</span>
+                                            <span style="color: var(--gray); font-size: 0.8rem;">${activity.time}</span>
+                                        </div>
+                                        <div style="color: var(--gray); margin-top: 5px;">${activity.description}</div>
+                                    </div>
+                                `).join('') : 
+                                '<p style="text-align: center; color: var(--gray); padding: 2rem;">No recent activities</p>'
+                            }
+                        </div>
+                    </div>
+                `;
+            }
+
+            getTodayRides(rides) {
+                const today = new Date().toDateString();
+                return rides.filter(ride => new Date(ride.startTime || ride.date).toDateString() === today).length;
+            }
+
+            getTodayEarnings(rides) {
+                const today = new Date().toDateString();
+                return rides
+                    .filter(ride => new Date(ride.startTime || ride.date).toDateString() === today)
+                    .reduce((sum, ride) => sum + (ride.fare || 0), 0);
+            }
+
+            getActiveRiders(riders) {
+                return riders.filter(rider => rider.status === 'active').length;
+            }
+
+            getNewCustomers(customers) {
+                const today = new Date().toDateString();
+                return customers.filter(customer => 
+                    new Date(customer.registrationDate).toDateString() === today
+                ).length;
+            }
+
+            getRecentActivities() {
+                const activities = [];
+                const rides = DatabaseService.getRides();
+                const complaints = DatabaseService.getComplaints();
+                const cancelledRides = DatabaseService.getCancelledRides();
+                
+                // Add recent rides
+                rides.slice(-5).reverse().forEach(ride => {
+                    activities.push({
+                        title: `Ride ${ride.status === 'completed' ? 'Completed' : 'Started'}`,
+                        description: `${ride.customerName} → ${ride.riderName} - PKR ${ride.fare}`,
+                        time: this.formatTime(ride.startTime || ride.date)
+                    });
+                });
+                
+                // Add recent complaints
+                complaints.slice(-5).reverse().forEach(complaint => {
+                    activities.push({
+                        title: 'New Complaint',
+                        description: `${complaint.submittedBy} complained about ${complaint.riderName}`,
+                        time: this.formatTime(complaint.date)
+                    });
+                });
+                
+                // Add recent cancellations
+                cancelledRides.slice(-5).reverse().forEach(ride => {
+                    activities.push({
+                        title: 'Ride Cancelled',
+                        description: `${ride.cancelledBy} cancelled a ride - ${ride.reason}`,
+                        time: this.formatTime(ride.date)
+                    });
+                });
+                
+                return activities.sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 10);
+            }
+
+            formatTime(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diff = now - date;
+                
+                if (diff < 60000) return 'Just now';
+                if (diff < 3600000) return `${Math.floor(diff / 60000)} minutes ago`;
+                if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
+                return date.toLocaleDateString();
+            }
+
+            // RIDERS MANAGEMENT
+            showRiders() {
+                this.updateHeader();
+                
+                const riders = DatabaseService.getRiders();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-motorcycle"></i> Riders Management
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-yellow" onclick="adminApp.showAddRiderModal()">
+                                    <i class="fas fa-plus"></i> Add Rider
+                                </button>
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="search-bar">
+                            <input type="text" class="search-input" id="riderSearch" placeholder="Search riders by name or ID...">
+                        </div>
+                        
+                        ${riders.length > 0 ? `
+                            <div style="overflow-x: auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Vehicle</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ridersTableBody">
+                                        ${riders.map(rider => `
+                                            <tr>
+                                                <td><strong>${rider.id || 'N/A'}</strong></td>
+                                                <td>${rider.name}</td>
+                                                <td>${rider.phone || 'N/A'}</td>
+                                                <td>${rider.vehicle || 'Motorcycle'}</td>
+                                                <td>
+                                                    <span class="status-badge ${rider.status === 'active' ? 'status-active' : 'status-pending'}">
+                                                        ${rider.status || 'pending'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn-small" onclick="adminApp.viewRiderDetails('${rider.id}')">
+                                                        View
+                                                    </button>
+                                                    <button class="btn-small btn-blue" onclick="adminApp.editRider('${rider.id}')">
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                                <i class="fas fa-motorcycle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p>No riders registered yet</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+
+                // Add search functionality
+                document.getElementById('riderSearch').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#ridersTableBody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+
+            showAddRiderModal() {
+                document.getElementById('addRiderModal').classList.add('active');
+                
+                // Generate random 5-digit ID
+                const riderId = Math.floor(10000 + Math.random() * 90000);
+                
+                // Reset form
+                document.getElementById('riderName').value = '';
+                document.getElementById('riderPhone').value = '';
+                document.getElementById('riderPlate').value = 'AJK-' + Math.floor(1000 + Math.random() * 9000);
+                document.getElementById('riderWhatsapp').value = '';
+                document.getElementById('riderPassword').value = `rider${riderId}`;
+                
+                // Setup event listeners
+                document.getElementById('closeRiderModal').onclick = () => {
+                    document.getElementById('addRiderModal').classList.remove('active');
+                };
+                
+                document.getElementById('saveRiderBtn').onclick = () => {
+                    this.saveNewRider(riderId);
+                };
+            }
+
+            saveNewRider(riderId) {
+                const name = document.getElementById('riderName').value;
+                const phone = document.getElementById('riderPhone').value;
+                const vehicle = document.getElementById('riderVehicle').value;
+                const plate = document.getElementById('riderPlate').value;
+                const whatsapp = document.getElementById('riderWhatsapp').value;
+                const password = document.getElementById('riderPassword').value;
+
+                if (!name || !phone || !plate) {
+                    this.showNotification('Please fill all required fields', 'error');
+                    return;
+                }
+
+                const newRider = {
+                    id: riderId.toString(),
+                    name,
+                    phone,
+                    vehicle,
+                    plate,
+                    whatsapp,
+                    password,
+                    status: 'active',
+                    registrationDate: new Date().toISOString(),
+                    completedRides: 0,
+                    earnings: 0,
+                    rating: 4.5
+                };
+
+                // Save to database
+                const riders = DatabaseService.getRiders();
+                riders.push(newRider);
+                DatabaseService.saveRiders(riders);
+
+                // Close modal and refresh
+                document.getElementById('addRiderModal').classList.remove('active');
+                this.showRiders();
+                
+                this.showNotification(`Rider added successfully! Rider ID: ${riderId}`, 'success');
+            }
+
+            viewRiderDetails(riderId) {
+                const riders = DatabaseService.getRiders();
+                const rider = riders.find(r => r.id === riderId);
+                
+                if (!rider) {
+                    this.showNotification('Rider not found', 'error');
+                    return;
+                }
+
+                const rides = DatabaseService.getRides();
+                const riderRides = rides.filter(ride => ride.riderId === riderId);
+                const completedRides = riderRides.filter(ride => ride.status === 'completed');
+                const cancelledRides = DatabaseService.getCancelledRides();
+                const riderCancelled = cancelledRides.filter(ride => ride.riderId === riderId);
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Rider Details</h3>
+                            <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background-color: var(--light-green); 
+                                    display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <h3 style="margin-top: 1rem; color: var(--primary-green);">${rider.name}</h3>
+                            <div style="background: var(--yellow); color: var(--black); padding: 4px 12px; 
+                                    border-radius: 20px; display: inline-block; font-weight: 600; margin-top: 5px;">
+                                ID: ${rider.id}
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Phone</div>
+                                    <div style="font-weight: 600;">${rider.phone}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">WhatsApp</div>
+                                    <div style="font-weight: 600;">${rider.whatsapp || 'N/A'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Vehicle</div>
+                                    <div style="font-weight: 600;">${rider.vehicle}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Plate Number</div>
+                                    <div style="font-weight: 600;">${rider.plate}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Status</div>
+                                    <div style="font-weight: 600;">
+                                        <span class="status-badge ${rider.status === 'active' ? 'status-active' : 'status-pending'}">
+                                            ${rider.status}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Rating</div>
+                                    <div style="font-weight: 600;">${rider.rating || '4.5'} ★</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">Performance Stats</h4>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Total Rides</div>
+                                    <div style="font-weight: 600;">${riderRides.length}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Completed Rides</div>
+                                    <div style="font-weight: 600;">${completedRides.length}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Total Earnings</div>
+                                    <div style="font-weight: 600;">PKR ${rider.earnings || 0}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Cancelled Rides</div>
+                                    <div style="font-weight: 600;">${riderCancelled.length}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 0.9rem; color: var(--gray);">Login Credentials</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 5px;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Rider ID</div>
+                                    <div style="font-weight: 600; background: #FFF8E1; padding: 8px; border-radius: 6px;">
+                                        ${rider.id}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Password</div>
+                                    <div style="font-weight: 600; background: #FFF8E1; padding: 8px; border-radius: 6px;">
+                                        ${rider.password}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                            <button class="btn" onclick="adminApp.sendMessageToRider('${rider.name}', '${rider.phone}', '${rider.whatsapp}')">
+                                <i class="fas fa-envelope"></i> Message
+                            </button>
+                            <button class="btn btn-yellow" onclick="adminApp.editRider('${rider.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger" onclick="adminApp.deleteRider('${rider.id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                        
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()" style="margin-top: 1rem;">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            editRider(riderId) {
+                const riders = DatabaseService.getRiders();
+                const rider = riders.find(r => r.id === riderId);
+                
+                if (!rider) {
+                    this.showNotification('Rider not found', 'error');
+                    return;
+                }
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Edit Rider</h3>
+                            <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rider Name</label>
+                            <input type="text" class="form-input" id="editRiderName" value="${rider.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-input" id="editRiderPhone" value="${rider.phone}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Vehicle Type</label>
+                            <select class="form-input" id="editRiderVehicle">
+                                <option value="motorcycle" ${rider.vehicle === 'motorcycle' ? 'selected' : ''}>Motorcycle</option>
+                                <option value="car" ${rider.vehicle === 'car' ? 'selected' : ''}>Car</option>
+                                <option value="auto" ${rider.vehicle === 'auto' ? 'selected' : ''}>Auto Rickshaw</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Vehicle Plate Number</label>
+                            <input type="text" class="form-input" id="editRiderPlate" value="${rider.plate}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select class="form-input" id="editRiderStatus">
+                                <option value="active" ${rider.status === 'active' ? 'selected' : ''}>Active</option>
+                                <option value="inactive" ${rider.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                                <option value="pending" ${rider.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reset Password</label>
+                            <input type="text" class="form-input" id="editRiderPassword" value="${rider.password}" required>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                            <button class="btn" onclick="adminApp.updateRider('${riderId}')">Save Changes</button>
+                            <button class="btn btn-danger" onclick="this.closest('.modal').remove()">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            updateRider(riderId) {
+                const name = document.getElementById('editRiderName').value;
+                const phone = document.getElementById('editRiderPhone').value;
+                const vehicle = document.getElementById('editRiderVehicle').value;
+                const plate = document.getElementById('editRiderPlate').value;
+                const status = document.getElementById('editRiderStatus').value;
+                const password = document.getElementById('editRiderPassword').value;
+
+                if (!name || !phone || !plate) {
+                    this.showNotification('Please fill all required fields', 'error');
+                    return;
+                }
+
+                const riders = DatabaseService.getRiders();
+                const riderIndex = riders.findIndex(r => r.id === riderId);
+                
+                if (riderIndex !== -1) {
+                    riders[riderIndex] = {
+                        ...riders[riderIndex],
+                        name,
+                        phone,
+                        vehicle,
+                        plate,
+                        status,
+                        password
+                    };
+                    
+                    DatabaseService.saveRiders(riders);
+                    document.querySelector('.modal.active').remove();
+                    this.showRiders();
+                    this.showNotification('Rider updated successfully', 'success');
+                }
+            }
+
+            deleteRider(riderId) {
+                if (!confirm('Are you sure you want to delete this rider? This action cannot be undone.')) {
+                    return;
+                }
+
+                const riders = DatabaseService.getRiders();
+                const filteredRiders = riders.filter(r => r.id !== riderId);
+                DatabaseService.saveRiders(filteredRiders);
+                
+                document.querySelector('.modal.active')?.remove();
+                this.showRiders();
+                this.showNotification('Rider deleted successfully', 'success');
+            }
+
+            // CUSTOMERS MANAGEMENT
+            showCustomers() {
+                this.updateHeader();
+                
+                const customers = DatabaseService.getCustomers();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-users"></i> Customers Management
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="search-bar">
+                            <input type="text" class="search-input" id="customerSearch" placeholder="Search customers by name or phone...">
+                        </div>
+                        
+                        ${customers.length > 0 ? `
+                            <div style="overflow-x: auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Email</th>
+                                            <th>Total Rides</th>
+                                            <th>Joined</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTableBody">
+                                        ${customers.map(customer => `
+                                            <tr>
+                                                <td>${customer.name}</td>
+                                                <td>${customer.phone}</td>
+                                                <td>${customer.email || 'N/A'}</td>
+                                                <td>${customer.totalRides || 0}</td>
+                                                <td>${new Date(customer.registrationDate).toLocaleDateString()}</td>
+                                                <td>
+                                                    <button class="btn-small" onclick="adminApp.viewCustomerDetails('${customer.id}')">
+                                                        View
+                                                    </button>
+                                                    <button class="btn-small btn-blue" onclick="adminApp.sendMessageToCustomer('${customer.name}', '${customer.phone}', '${customer.email}')">
+                                                        Message
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                                <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p>No customers registered yet</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+
+                // Add search functionality
+                document.getElementById('customerSearch').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#customersTableBody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+
+            viewCustomerDetails(customerId) {
+                const customers = DatabaseService.getCustomers();
+                const customer = customers.find(c => c.id === customerId);
+                
+                if (!customer) {
+                    this.showNotification('Customer not found', 'error');
+                    return;
+                }
+
+                const rides = DatabaseService.getRides();
+                const customerRides = rides.filter(ride => ride.customer?.id === customerId || ride.customerPhone === customer.phone);
+                const cancelledRides = DatabaseService.getCancelledRides();
+                const customerCancelled = cancelledRides.filter(ride => ride.customerId === customerId);
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Customer Details</h3>
+                            <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background-color: var(--blue); 
+                                    display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3 style="margin-top: 1rem; color: var(--primary-green);">${customer.name}</h3>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Phone</div>
+                                    <div style="font-weight: 600;">${customer.phone}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Email</div>
+                                    <div style="font-weight: 600;">${customer.email || 'N/A'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Total Rides</div>
+                                    <div style="font-weight: 600;">${customer.totalRides || 0}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Member Since</div>
+                                    <div style="font-weight: 600;">${new Date(customer.registrationDate).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">Ride Statistics</h4>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Total Rides</div>
+                                    <div style="font-weight: 600;">${customerRides.length}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Completed Rides</div>
+                                    <div style="font-weight: 600;">${customerRides.filter(r => r.status === 'completed').length}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Cancelled Rides</div>
+                                    <div style="font-weight: 600;">${customerCancelled.length}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Total Spent</div>
+                                    <div style="font-weight: 600;">PKR ${customerRides.reduce((sum, ride) => sum + (ride.fare || 0), 0)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                            <button class="btn" onclick="adminApp.sendMessageToCustomer('${customer.name}', '${customer.phone}', '${customer.email}')">
+                                <i class="fas fa-envelope"></i> Message
+                            </button>
+                            <button class="btn btn-danger" onclick="adminApp.deleteCustomer('${customerId}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                        
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()" style="margin-top: 1rem;">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            deleteCustomer(customerId) {
+                if (!confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+                    return;
+                }
+
+                const customers = DatabaseService.getCustomers();
+                const filteredCustomers = customers.filter(c => c.id !== customerId);
+                DatabaseService.saveCustomers(filteredCustomers);
+                
+                document.querySelector('.modal.active')?.remove();
+                this.showCustomers();
+                this.showNotification('Customer deleted successfully', 'success');
+            }
+
+            // RIDES MANAGEMENT
+            showRides() {
+                this.updateHeader();
+                
+                const rides = DatabaseService.getRides();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-road"></i> Rides Management
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="tabs">
+                            <div class="tab active" onclick="adminApp.switchRidesTab('allRides')">All Rides</div>
+                            <div class="tab" onclick="adminApp.switchRidesTab('todayRides')">Today's Rides</div>
+                            <div class="tab" onclick="adminApp.switchRidesTab('completedRides')">Completed</div>
+                            <div class="tab" onclick="adminApp.switchRidesTab('activeRides')">Active</div>
+                        </div>
+                        
+                        <div id="allRides" class="tab-content active">
+                            ${this.renderRidesTable(rides)}
+                        </div>
+                        
+                        <div id="todayRides" class="tab-content">
+                            ${this.renderRidesTable(rides.filter(ride => 
+                                new Date(ride.startTime || ride.date).toDateString() === new Date().toDateString()
+                            ))}
+                        </div>
+                        
+                        <div id="completedRides" class="tab-content">
+                            ${this.renderRidesTable(rides.filter(ride => ride.status === 'completed'))}
+                        </div>
+                        
+                        <div id="activeRides" class="tab-content">
+                            ${this.renderRidesTable(rides.filter(ride => ride.status === 'active'))}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderRidesTable(rides) {
+                if (rides.length === 0) {
+                    return `
+                        <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                            <i class="fas fa-road" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No rides found</p>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th>Rider</th>
+                                    <th>From → To</th>
+                                    <th>Fare</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rides.map(ride => `
+                                    <tr>
+                                        <td>${new Date(ride.startTime || ride.date).toLocaleDateString()}</td>
+                                        <td>${ride.customerName || ride.customer?.name}</td>
+                                        <td>${ride.riderName}</td>
+                                        <td>
+                                            <div style="font-size: 0.9rem;">${ride.pickup}</div>
+                                            <div style="font-size: 0.8rem; color: var(--gray);">→ ${ride.destination}</div>
+                                        </td>
+                                        <td style="font-weight: 600;">PKR ${ride.fare}</td>
+                                        <td>
+                                            <span class="status-badge ${ride.status === 'completed' ? 'status-completed' : 
+                                                ride.status === 'active' ? 'status-active' : 'status-cancelled'}">
+                                                ${ride.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn-small" onclick="adminApp.viewRideDetails('${ride.id}')">
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            switchRidesTab(tabName) {
+                // Update tab classes
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Activate selected tab
+                event.target.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            }
+
+            viewRideDetails(rideId) {
+                const rides = DatabaseService.getRides();
+                const ride = rides.find(r => r.id === rideId);
+                
+                if (!ride) {
+                    this.showNotification('Ride not found', 'error');
+                    return;
+                }
+
+                const customers = DatabaseService.getCustomers();
+                const customer = customers.find(c => c.phone === ride.customerPhone);
+                const riders = DatabaseService.getRiders();
+                const rider = riders.find(r => r.id === ride.riderId);
+
+                document.getElementById('rideDetailsModal').classList.add('active');
+                
+                document.getElementById('rideDetailsContent').innerHTML = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Ride ID</div>
+                                <div style="font-weight: 600;">${ride.id}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Status</div>
+                                <div>
+                                    <span class="status-badge ${ride.status === 'completed' ? 'status-completed' : 
+                                        ride.status === 'active' ? 'status-active' : 'status-cancelled'}">
+                                        ${ride.status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">Ride Information</h4>
+                            <div style="margin-bottom: 10px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Pickup Location</div>
+                                <div style="font-weight: 600;">${ride.pickup}</div>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Destination</div>
+                                <div style="font-weight: 600;">${ride.destination}</div>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Fare</div>
+                                <div style="font-weight: 600;">PKR ${ride.fare}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Date & Time</div>
+                                <div style="font-weight: 600;">${new Date(ride.startTime || ride.date).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">Customer Details</h4>
+                            <div style="margin-bottom: 5px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Name</div>
+                                <div style="font-weight: 600;">${ride.customerName}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Phone</div>
+                                <div style="font-weight: 600;">${ride.customerPhone}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">Rider Details</h4>
+                            <div style="margin-bottom: 5px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Name</div>
+                                <div style="font-weight: 600;">${ride.riderName}</div>
+                            </div>
+                            <div style="margin-bottom: 5px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Vehicle</div>
+                                <div style="font-weight: 600;">${ride.vehicle || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Plate Number</div>
+                                <div style="font-weight: 600;">${ride.plate || 'N/A'}</div>
+                            </div>
+                        </div>
+                        
+                        ${ride.endTime ? `
+                            <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Completion Details</h4>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Completed At</div>
+                                    <div style="font-weight: 600;">${new Date(ride.endTime).toLocaleString()}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <button class="btn" onclick="adminApp.closeRideDetailsModal()">Close</button>
+                `;
+            }
+
+            closeRideDetailsModal() {
+                document.getElementById('rideDetailsModal').classList.remove('active');
+            }
+
+            // COMPLAINTS MANAGEMENT
+            showComplaints() {
+                this.updateHeader();
+                
+                const complaints = DatabaseService.getComplaints();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-exclamation-triangle"></i> Complaints Management
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="tabs">
+                            <div class="tab active" onclick="adminApp.switchComplaintsTab('allComplaints')">All</div>
+                            <div class="tab" onclick="adminApp.switchComplaintsTab('pendingComplaints')">Pending</div>
+                            <div class="tab" onclick="adminApp.switchComplaintsTab('resolvedComplaints')">Resolved</div>
+                        </div>
+                        
+                        <div id="allComplaints" class="tab-content active">
+                            ${this.renderComplaintsTable(complaints)}
+                        </div>
+                        
+                        <div id="pendingComplaints" class="tab-content">
+                            ${this.renderComplaintsTable(complaints.filter(c => c.status === 'pending'))}
+                        </div>
+                        
+                        <div id="resolvedComplaints" class="tab-content">
+                            ${this.renderComplaintsTable(complaints.filter(c => c.status === 'resolved'))}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderComplaintsTable(complaints) {
+                if (complaints.length === 0) {
+                    return `
+                        <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No complaints found</p>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Against Rider</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${complaints.map(complaint => `
+                                    <tr>
+                                        <td>${new Date(complaint.date).toLocaleDateString()}</td>
+                                        <td>${complaint.riderName}</td>
+                                        <td>${complaint.contact}</td>
+                                        <td>
+                                            <span class="status-badge ${complaint.status === 'pending' ? 'status-pending' : 
+                                                complaint.status === 'resolved' ? 'status-approved' : 'status-rejected'}">
+                                                ${complaint.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn-small" onclick="adminApp.viewComplaintDetails('${complaint.id}')">
+                                                View
+                                            </button>
+                                            <button class="btn-small btn-blue" onclick="adminApp.sendMessageAboutComplaint('${complaint.contact}', '${complaint.riderName}')">
+                                                Reply
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            switchComplaintsTab(tabName) {
+                // Update tab classes
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Activate selected tab
+                event.target.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            }
+
+            viewComplaintDetails(complaintId) {
+                const complaints = DatabaseService.getComplaints();
+                const complaint = complaints.find(c => c.id === complaintId);
+                
+                if (!complaint) {
+                    this.showNotification('Complaint not found', 'error');
+                    return;
+                }
+
+                document.getElementById('complaintDetailsModal').classList.add('active');
+                
+                document.getElementById('complaintDetailsContent').innerHTML = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Complaint ID</div>
+                                <div style="font-weight: 600;">${complaint.id}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Status</div>
+                                <div>
+                                    <span class="status-badge ${complaint.status === 'pending' ? 'status-pending' : 
+                                        complaint.status === 'resolved' ? 'status-approved' : 'status-rejected'}">
+                                        ${complaint.status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">Complaint Details</h4>
+                            <div style="margin-bottom: 10px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Against Rider</div>
+                                <div style="font-weight: 600;">${complaint.riderName}</div>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <div style="font-size: 0.9rem; color: var(--gray);">Submitted By</div>
+                                <div style="font-weight: 600;">${complaint.submittedBy} (${complaint.contact})</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--gray);">Date</div>
+                                <div style="font-weight: 600;">${new Date(complaint.date).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <h4 style="color: var(--primary-green); margin-bottom: 10px;">Description</h4>
+                            <p style="line-height: 1.5;">${complaint.details}</p>
+                        </div>
+                        
+                        ${complaint.rating > 0 ? `
+                            <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Rating Given</h4>
+                                <div style="font-size: 1.2rem; color: var(--yellow);">
+                                    ${'★'.repeat(complaint.rating)}${'☆'.repeat(5 - complaint.rating)}
+                                    <span style="color: var(--black); margin-left: 10px;">${complaint.rating}/5</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <div style="font-size: 0.9rem; color: var(--gray); margin-bottom: 10px;">Update Status</div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-small ${complaint.status === 'pending' ? 'btn-yellow' : ''}" 
+                                        onclick="adminApp.updateComplaintStatus('${complaint.id}', 'pending')">
+                                    Pending
+                                </button>
+                                <button class="btn-small ${complaint.status === 'resolved' ? 'btn' : ''}" 
+                                        onclick="adminApp.updateComplaintStatus('${complaint.id}', 'resolved')">
+                                    Resolved
+                                </button>
+                                <button class="btn-small ${complaint.status === 'rejected' ? 'btn-danger' : ''}" 
+                                        onclick="adminApp.updateComplaintStatus('${complaint.id}', 'rejected')">
+                                    Rejected
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" onclick="adminApp.sendMessageAboutComplaint('${complaint.contact}', '${complaint.riderName}')">
+                            <i class="fas fa-envelope"></i> Reply to Complainant
+                        </button>
+                        <button class="btn btn-secondary" onclick="adminApp.closeComplaintModal()">Close</button>
+                    </div>
+                `;
+            }
+
+            updateComplaintStatus(complaintId, status) {
+                const complaints = DatabaseService.getComplaints();
+                const complaintIndex = complaints.findIndex(c => c.id === complaintId);
+                
+                if (complaintIndex !== -1) {
+                    complaints[complaintIndex].status = status;
+                    DatabaseService.saveComplaints(complaints);
+                    this.viewComplaintDetails(complaintId); // Refresh
+                    this.showNotification(`Complaint marked as ${status}`, 'success');
+                }
+            }
+
+            closeComplaintModal() {
+                document.getElementById('complaintDetailsModal').classList.remove('active');
+                this.showComplaints(); // Refresh complaints list
+            }
+
+            // CANCELLED RIDES
+            showCancelledRides() {
+                this.updateHeader();
+                
+                const cancelledRides = DatabaseService.getCancelledRides();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-ban"></i> Cancelled Rides
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        ${cancelledRides.length > 0 ? `
+                            <div style="overflow-x: auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Customer</th>
+                                            <th>Rider</th>
+                                            <th>Reason</th>
+                                            <th>Cancelled By</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${cancelledRides.map(ride => `
+                                            <tr>
+                                                <td>${new Date(ride.date).toLocaleDateString()}</td>
+                                                <td>${ride.customerName}</td>
+                                                <td>${ride.riderName || 'N/A'}</td>
+                                                <td>${ride.reason}</td>
+                                                <td>${ride.cancelledBy}</td>
+                                                <td>
+                                                    <button class="btn-small" onclick="adminApp.viewCancelledRideDetails('${ride.rideId || ride.requestId}')">
+                                                        View
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                                <i class="fas fa-ban" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p>No cancelled rides found</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            viewCancelledRideDetails(rideId) {
+                const cancelledRides = DatabaseService.getCancelledRides();
+                const ride = cancelledRides.find(r => r.rideId === rideId || r.requestId === rideId);
+                
+                if (!ride) {
+                    this.showNotification('Cancelled ride not found', 'error');
+                    return;
+                }
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Cancelled Ride Details</h3>
+                            <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Cancellation Information</h4>
+                                <div style="margin-bottom: 5px;">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Cancelled By</div>
+                                    <div style="font-weight: 600;">${ride.cancelledBy}</div>
+                                </div>
+                                <div style="margin-bottom: 5px;">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Reason</div>
+                                    <div style="font-weight: 600;">${ride.reason}</div>
+                                </div>
+                                <div style="margin-bottom: 5px;">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Date & Time</div>
+                                    <div style="font-weight: 600;">${new Date(ride.date).toLocaleString()}</div>
+                                </div>
+                                ${ride.customerName ? `
+                                    <div style="margin-bottom: 5px;">
+                                        <div style="font-size: 0.9rem; color: var(--gray);">Customer</div>
+                                        <div style="font-weight: 600;">${ride.customerName}</div>
+                                    </div>
+                                ` : ''}
+                                ${ride.riderName ? `
+                                    <div>
+                                        <div style="font-size: 0.9rem; color: var(--gray);">Rider</div>
+                                        <div style="font-weight: 600;">${ride.riderName}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            ${ride.details ? `
+                                <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                                    <h4 style="color: var(--primary-green); margin-bottom: 10px;">Additional Details</h4>
+                                    <p style="line-height: 1.5;">${ride.details}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <button class="btn" onclick="this.closest('.modal').remove()">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            // ACTIVE REQUESTS
+            showActiveRequests() {
+                this.updateHeader();
+                
+                const requests = DatabaseService.getActiveRideRequests();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-bell"></i> Active Ride Requests
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        ${requests.length > 0 ? `
+                            <div style="overflow-x: auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Customer</th>
+                                            <th>Phone</th>
+                                            <th>From → To</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${requests.map(request => `
+                                            <tr>
+                                                <td>${new Date(request.timestamp).toLocaleTimeString()}</td>
+                                                <td>${request.customerName}</td>
+                                                <td>${request.customerPhone}</td>
+                                                <td>
+                                                    <div style="font-size: 0.9rem;">${request.pickup}</div>
+                                                    <div style="font-size: 0.8rem; color: var(--gray);">→ ${request.destination}</div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn-small" onclick="adminApp.viewRequestDetails('${request.requestId}')">
+                                                        View
+                                                    </button>
+                                                    <button class="btn-small btn-danger" onclick="adminApp.cancelRequest('${request.requestId}')">
+                                                        Cancel
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                                <i class="fas fa-bell-slash" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p>No active ride requests</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            viewRequestDetails(requestId) {
+                const requests = DatabaseService.getActiveRideRequests();
+                const request = requests.find(r => r.requestId === requestId);
+                
+                if (!request) {
+                    this.showNotification('Request not found', 'error');
+                    return;
+                }
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Ride Request Details</h3>
+                            <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Request Information</h4>
+                                <div style="margin-bottom: 5px;">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Request ID</div>
+                                    <div style="font-weight: 600;">${request.requestId}</div>
+                                </div>
+                                <div style="margin-bottom: 5px;">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Time</div>
+                                    <div style="font-weight: 600;">${new Date(request.timestamp).toLocaleString()}</div>
+                                </div>
+                                <div style="margin-bottom: 5px;">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Pickup Location</div>
+                                    <div style="font-weight: 600;">${request.pickup}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Destination</div>
+                                    <div style="font-weight: 600;">${request.destination}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Customer Details</h4>
+                                <div style="margin-bottom: 5px;">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Name</div>
+                                    <div style="font-weight: 600;">${request.customerName}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Phone</div>
+                                    <div style="font-weight: 600;">${request.customerPhone}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-green); margin-bottom: 10px;">Active Offers</h4>
+                                ${this.getRequestOffers(requestId).length > 0 ? 
+                                    this.getRequestOffers(requestId).map(offer => `
+                                        <div style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <div style="font-weight: 600;">${offer.riderName}</div>
+                                                <div style="font-weight: 600; color: var(--primary-green);">PKR ${offer.fare}</div>
+                                            </div>
+                                            <div style="font-size: 0.9rem; color: var(--gray);">
+                                                ${offer.vehicle} • ${offer.arrivalTime} mins • ${offer.rating}★
+                                            </div>
+                                        </div>
+                                    `).join('') : 
+                                    '<p style="text-align: center; color: var(--gray);">No offers yet</p>'
+                                }
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" onclick="adminApp.sendMessageToCustomer('${request.customerName}', '${request.customerPhone}', '')">
+                                <i class="fas fa-envelope"></i> Contact Customer
+                            </button>
+                            <button class="btn btn-danger" onclick="adminApp.cancelRequest('${request.requestId}')">
+                                <i class="fas fa-ban"></i> Cancel Request
+                            </button>
+                        </div>
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()" style="margin-top: 1rem;">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            getRequestOffers(requestId) {
+                const offers = DatabaseService.getActiveOffers();
+                return offers.filter(offer => offer.requestId === requestId);
+            }
+
+            cancelRequest(requestId) {
+                if (!confirm('Are you sure you want to cancel this ride request?')) {
+                    return;
+                }
+
+                const requests = DatabaseService.getActiveRideRequests();
+                const filteredRequests = requests.filter(r => r.requestId !== requestId);
+                DatabaseService.saveActiveRideRequests(filteredRequests);
+                
+                // Also remove related offers
+                const offers = DatabaseService.getActiveOffers();
+                const filteredOffers = offers.filter(o => o.requestId !== requestId);
+                DatabaseService.saveActiveOffers(filteredOffers);
+                
+                document.querySelector('.modal.active')?.remove();
+                this.showActiveRequests();
+                this.showNotification('Ride request cancelled successfully', 'success');
+            }
+
+            // ACTIVE RIDES
+            showActiveRides() {
+                this.updateHeader();
+                
+                const rides = DatabaseService.getRides();
+                const activeRides = rides.filter(ride => ride.status === 'active');
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-car"></i> Active Rides
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        ${activeRides.length > 0 ? `
+                            <div style="overflow-x: auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Start Time</th>
+                                            <th>Customer</th>
+                                            <th>Rider</th>
+                                            <th>From → To</th>
+                                            <th>Fare</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${activeRides.map(ride => `
+                                            <tr>
+                                                <td>${new Date(ride.startTime).toLocaleTimeString()}</td>
+                                                <td>${ride.customerName}</td>
+                                                <td>${ride.riderName}</td>
+                                                <td>
+                                                    <div style="font-size: 0.9rem;">${ride.pickup}</div>
+                                                    <div style="font-size: 0.8rem; color: var(--gray);">→ ${ride.destination}</div>
+                                                </td>
+                                                <td style="font-weight: 600;">PKR ${ride.fare}</td>
+                                                <td>
+                                                    <button class="btn-small" onclick="adminApp.viewRideDetails('${ride.id}')">
+                                                        View
+                                                    </button>
+                                                    <button class="btn-small btn-yellow" onclick="adminApp.markRideCompleted('${ride.id}')">
+                                                        Complete
+                                                    </button>
+                                                    <button class="btn-small btn-danger" onclick="adminApp.cancelActiveRide('${ride.id}')">
+                                                        Cancel
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                                <i class="fas fa-car" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p>No active rides</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            markRideCompleted(rideId) {
+                if (!confirm('Mark this ride as completed?')) {
+                    return;
+                }
+
+                const rides = DatabaseService.getRides();
+                const rideIndex = rides.findIndex(r => r.id === rideId);
+                
+                if (rideIndex !== -1) {
+                    rides[rideIndex].status = 'completed';
+                    rides[rideIndex].endTime = new Date().toISOString();
+                    DatabaseService.saveRides(rides);
+                    
+                    // Update rider stats
+                    const riders = DatabaseService.getRiders();
+                    const riderIndex = riders.findIndex(r => r.id === rides[rideIndex].riderId);
+                    if (riderIndex !== -1) {
+                        riders[riderIndex].completedRides = (riders[riderIndex].completedRides || 0) + 1;
+                        riders[riderIndex].earnings = (riders[riderIndex].earnings || 0) + rides[rideIndex].fare;
+                        DatabaseService.saveRiders(riders);
+                    }
+                    
+                    // Update customer stats
+                    const customers = DatabaseService.getCustomers();
+                    const customerIndex = customers.findIndex(c => c.phone === rides[rideIndex].customerPhone);
+                    if (customerIndex !== -1) {
+                        customers[customerIndex].totalRides = (customers[customerIndex].totalRides || 0) + 1;
+                        DatabaseService.saveCustomers(customers);
+                    }
+                    
+                    this.showActiveRides();
+                    this.showNotification('Ride marked as completed', 'success');
+                }
+            }
+
+            cancelActiveRide(rideId) {
+                if (!confirm('Cancel this active ride?')) {
+                    return;
+                }
+
+                const rides = DatabaseService.getRides();
+                const rideIndex = rides.findIndex(r => r.id === rideId);
+                
+                if (rideIndex !== -1) {
+                    const ride = rides[rideIndex];
+                    rides.splice(rideIndex, 1);
+                    DatabaseService.saveRides(rides);
+                    
+                    // Add to cancelled rides
+                    const cancelledRides = DatabaseService.getCancelledRides();
+                    cancelledRides.push({
+                        rideId: ride.id,
+                        customerName: ride.customerName,
+                        riderName: ride.riderName,
+                        reason: 'Cancelled by admin',
+                        cancelledBy: 'admin',
+                        date: new Date().toISOString()
+                    });
+                    DatabaseService.saveCancelledRides(cancelledRides);
+                    
+                    this.showActiveRides();
+                    this.showNotification('Ride cancelled successfully', 'success');
+                }
+            }
+
+            // ADMINS MANAGEMENT
+            showAdmins() {
+                this.updateHeader();
+                
+                const admins = DatabaseService.getAdmins();
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="section-container">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-user-shield"></i> Admins Management
+                            </h2>
+                            <div class="action-buttons">
+                                <button class="btn-small btn-blue" onclick="adminApp.showAddAdminModal()">
+                                    <i class="fas fa-plus"></i> Add Admin
+                                </button>
+                                <button class="btn-small btn-secondary" onclick="adminApp.showDashboard()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Name</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${admins.map(admin => `
+                                        <tr>
+                                            <td>${admin.username}</td>
+                                            <td>${admin.name}</td>
+                                            <td>
+                                                ${admin.username !== 'safeer' ? `
+                                                    <button class="btn-small btn-danger" onclick="adminApp.deleteAdmin('${admin.username}')">
+                                                        Delete
+                                                    </button>
+                                                ` : '<span style="color: var(--gray); font-size: 0.9rem;">Main Admin</span>'}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            showAddAdminModal() {
+                document.getElementById('addAdminModal').classList.add('active');
+                
+                document.getElementById('closeAdminModal').onclick = () => {
+                    document.getElementById('addAdminModal').classList.remove('active');
+                };
+                
+                document.getElementById('saveAdminBtn').onclick = () => {
+                    this.saveNewAdmin();
+                };
+            }
+
+            saveNewAdmin() {
+                const name = document.getElementById('adminName').value;
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                const confirmPassword = document.getElementById('adminConfirmPassword').value;
+
+                if (!name || !username || !password) {
+                    this.showNotification('Please fill all required fields', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showNotification('Passwords do not match', 'error');
+                    return;
+                }
+
+                const admins = DatabaseService.getAdmins();
+                
+                // Check if username already exists
+                if (admins.some(admin => admin.username === username)) {
+                    this.showNotification('Username already exists', 'error');
+                    return;
+                }
+
+                const newAdmin = {
+                    username,
+                    password,
+                    name
+                };
+
+                admins.push(newAdmin);
+                DatabaseService.saveAdmins(admins);
+
+                document.getElementById('addAdminModal').classList.remove('active');
+                this.showAdmins();
+                
+                this.showNotification('New admin added successfully!', 'success');
+            }
+
+            deleteAdmin(username) {
+                if (username === 'safeer') {
+                    this.showNotification('Cannot delete main admin account', 'error');
+                    return;
+                }
+
+                if (confirm('Are you sure you want to delete this admin?')) {
+                    let admins = DatabaseService.getAdmins();
+                    admins = admins.filter(admin => admin.username !== username);
+                    DatabaseService.saveAdmins(admins);
+                    this.showAdmins();
+                    this.showNotification('Admin deleted successfully', 'success');
+                }
+            }
+
+            // MESSAGING
+            sendMessageToRider(name, phone, whatsapp) {
+                document.getElementById('sendMessageModal').classList.add('active');
+                document.getElementById('messageRecipient').value = `${name} (${phone})`;
+                
+                document.getElementById('sendMessageBtn').onclick = () => {
+                    this.sendMessage(name, phone, whatsapp);
+                };
+            }
+
+            sendMessageToCustomer(name, phone, email) {
+                document.getElementById('sendMessageModal').classList.add('active');
+                document.getElementById('messageRecipient').value = `${name} (${phone})`;
+                
+                document.getElementById('sendMessageBtn').onclick = () => {
+                    this.sendMessage(name, phone, email);
+                };
+            }
+
+            sendMessageAboutComplaint(contact, riderName) {
+                document.getElementById('sendMessageModal').classList.add('active');
+                document.getElementById('messageRecipient').value = `Complainant (${contact})`;
+                document.getElementById('messageContent').value = `Dear User,\n\nThank you for your complaint regarding ${riderName}. We have reviewed your complaint and taken appropriate action.\n\nBest regards,\nTHE LAND RIDERS Admin`;
+                
+                document.getElementById('sendMessageBtn').onclick = () => {
+                    this.sendMessage('Complainant', contact, contact.includes('@') ? contact : '');
+                };
+            }
+
+            sendMessage(recipientName, phone, contactInfo) {
+                const messageType = document.getElementById('messageType').value;
+                const message = document.getElementById('messageContent').value;
+
+                if (!message) {
+                    this.showNotification('Please enter a message', 'error');
+                    return;
+                }
+
+                // In a real app, this would send via email/SMS/WhatsApp API
+                console.log(`Sending ${messageType} to ${recipientName} (${phone}):`, message);
+                
+                document.getElementById('sendMessageModal').classList.remove('active');
+                this.showNotification(`Message sent to ${recipientName} via ${messageType.toUpperCase()}`, 'success');
+                
+                // Reset form
+                document.getElementById('messageContent').value = '';
+            }
+
+            // UTILITY FUNCTIONS
+            logout() {
+                localStorage.removeItem('adminData');
+                this.currentAdmin = null;
+                this.showLogin();
+            }
+
+            setupWebSocket() {
+                this.socket = WebSocketService.connect();
+                
+                // Listen for new complaints
+                this.socket.on('onNewComplaint', (complaint) => {
+                    this.showNotification(`New complaint from ${complaint.submittedBy}`, 'info');
+                    if (this.currentAdmin) {
+                        this.showComplaints();
+                    }
+                });
+
+                // Listen for new ride requests
+                this.socket.on('onNewRideRequest', (request) => {
+                    this.showNotification(`New ride request from ${request.customerName}`, 'info');
+                    if (this.currentAdmin) {
+                        this.showActiveRequests();
+                    }
+                });
+
+                // Listen for ride completions
+                this.socket.on('onRideCompleted', (ride) => {
+                    this.showNotification(`Ride completed: ${ride.customerName} → ${ride.riderName}`, 'success');
+                    if (this.currentAdmin) {
+                        this.showDashboard();
+                    }
+                });
+
+                // Listen for ride cancellations
+                this.socket.on('onRideCancelled', (cancelledRide) => {
+                    this.showNotification(`Ride cancelled by ${cancelledRide.cancelledBy}`, 'warning');
+                    if (this.currentAdmin) {
+                        this.showDashboard();
+                        this.showCancelledRides();
+                    }
+                });
+
+                // Listen for new rider registrations
+                this.socket.on('onNewRiderRegistered', (rider) => {
+                    this.showNotification(`New rider registration: ${rider.name}`, 'info');
+                    if (this.currentAdmin) {
+                        this.showRiders();
+                    }
+                });
+            }
+
+            setupEventListeners() {
+                // Close modal buttons
+                document.getElementById('closeComplaintModal').onclick = () => {
+                    document.getElementById('complaintDetailsModal').classList.remove('active');
+                };
+
+                document.getElementById('closeRideModal').onclick = () => {
+                    document.getElementById('rideDetailsModal').classList.remove('active');
+                };
+
+                document.getElementById('closeMessageModal').onclick = () => {
+                    document.getElementById('sendMessageModal').classList.remove('active');
+                };
+            }
+
+            showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = 'status-message';
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 10px;
+                    z-index: 3000;
+                    max-width: 300px;
+                    animation: fadeIn 0.5s;
+                `;
+                
+                const colors = {
+                    success: '#4CAF50',
+                    error: '#f44336',
+                    warning: '#ff9800',
+                    info: '#2196F3'
+                };
+                
+                notification.innerHTML = `
+                    <div style="background: ${colors[type]}; color: white; padding: 12px 15px; border-radius: 8px; 
+                                display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                          type === 'error' ? 'exclamation-circle' : 
+                                          type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-10px)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 5000);
+            }
+        }
+
+        // Initialize admin app
+        const adminApp = new AdminApp();
+        window.adminApp = adminApp;
+    </script>
+</body>
+</html>
