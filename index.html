@@ -3213,5 +3213,416 @@ window.onload = function() {
     initSocketConnection();
 };
 </script>
+    <!-- Add this RIGHT BEFORE </body> -->
+<script>
+// ==================== BACKEND CONFIGURATION ====================
+// REPLACE THIS WITH YOUR RAILWAY BACKEND URL
+const BACKEND_URL = 'https://land-riders-backend.up.railway.app';
+let socket = null;
+let currentUser = null;
+
+// ==================== INITIALIZE SOCKET ====================
+function initializeSocket() {
+    console.log('Connecting to backend:', BACKEND_URL);
+    socket = io(BACKEND_URL);
+    
+    // Connection events
+    socket.on('connect', () => {
+        console.log('✅ Connected to backend');
+        updateConnectionStatus('connected');
+        
+        // Auto-login if credentials saved
+        const savedRider = localStorage.getItem('riderData');
+        const savedCustomer = localStorage.getItem('customerData');
+        
+        if (savedRider) {
+            const riderData = JSON.parse(savedRider);
+            socket.emit('rider_login', {
+                riderId: riderData.riderId,
+                password: localStorage.getItem('riderPassword')
+            });
+        } else if (savedCustomer) {
+            const customerData = JSON.parse(savedCustomer);
+            socket.emit('customer_login', {
+                phone: customerData.phone,
+                password: localStorage.getItem('customerPassword')
+            });
+        }
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('❌ Disconnected from backend');
+        updateConnectionStatus('disconnected');
+    });
+    
+    socket.on('connected', (data) => {
+        console.log('Server welcome:', data.message);
+    });
+    
+    // ==================== CUSTOMER EVENTS ====================
+    socket.on('login_success', handleLoginSuccess);
+    socket.on('register_success', handleRegisterSuccess);
+    socket.on('login_error', handleLoginError);
+    socket.on('register_error', handleRegisterError);
+    
+    socket.on('ride_requested', handleRideRequested);
+    socket.on('ride_accepted', handleRideAccepted);
+    socket.on('ride_completed', handleRideCompleted);
+    socket.on('ride_error', handleRideError);
+    
+    socket.on('complaint_submitted', handleComplaintSubmitted);
+    socket.on('complaint_updated', handleComplaintUpdated);
+    
+    // ==================== RIDER EVENTS ====================
+    socket.on('new_ride_request', handleNewRideRequest);
+    socket.on('ride_confirmed', handleRideConfirmed);
+    socket.on('ride_completed_rider', handleRideCompletedRider);
+    socket.on('ride_taken', handleRideTaken);
+    socket.on('available_rides', handleAvailableRides);
+}
+
+// ==================== CUSTOMER FUNCTIONS ====================
+function customerRegister(name, phone, password, email = '') {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    socket.emit('customer_register', {
+        name: name,
+        phone: phone,
+        password: password,
+        email: email
+    });
+    
+    // Save password for auto-login
+    localStorage.setItem('customerPassword', password);
+}
+
+function customerLogin(phone, password) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    socket.emit('customer_login', {
+        phone: phone,
+        password: password
+    });
+    
+    // Save password for auto-login
+    localStorage.setItem('customerPassword', password);
+}
+
+function requestRide(pickup, destination, fare = 'To be determined', notes = '') {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    if (!currentUser || currentUser.type !== 'customer') {
+        alert('Please login as customer first');
+        return false;
+    }
+    
+    socket.emit('request_ride', {
+        pickup: pickup,
+        destination: destination,
+        fare: fare,
+        notes: notes
+    });
+    
+    return true;
+}
+
+function submitComplaint(subject, message, rideId = null) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    socket.emit('submit_complaint', {
+        subject: subject,
+        message: message,
+        rideId: rideId
+    });
+}
+
+// ==================== RIDER FUNCTIONS ====================
+function riderLogin(riderId, password) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    socket.emit('rider_login', {
+        riderId: riderId,
+        password: password
+    });
+    
+    // Save password for auto-login
+    localStorage.setItem('riderPassword', password);
+}
+
+function updateRiderStatus(status, location = '') {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    if (!currentUser || currentUser.type !== 'rider') {
+        alert('Please login as rider first');
+        return false;
+    }
+    
+    socket.emit('rider_status_update', {
+        status: status,
+        location: location
+    });
+}
+
+function acceptRide(rideId) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    socket.emit('accept_ride', {
+        rideId: rideId
+    });
+}
+
+function completeRide(rideId, fare) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    socket.emit('complete_ride', {
+        rideId: rideId,
+        fare: fare
+    });
+}
+
+// ==================== EVENT HANDLERS ====================
+function handleLoginSuccess(data) {
+    console.log('Login successful:', data);
+    
+    if (data.user.riderId) {
+        // Rider login
+        currentUser = {
+            type: 'rider',
+            ...data.user
+        };
+        localStorage.setItem('riderData', JSON.stringify(data.user));
+        showRiderDashboard(data);
+    } else {
+        // Customer login
+        currentUser = {
+            type: 'customer',
+            ...data.user
+        };
+        localStorage.setItem('customerData', JSON.stringify(data.user));
+        showCustomerDashboard(data);
+    }
+    
+    showNotification('Login successful!', 'success');
+}
+
+function handleRegisterSuccess(data) {
+    console.log('Registration successful:', data);
+    showNotification('Registration successful!', 'success');
+    // Auto-login after registration
+    handleLoginSuccess(data);
+}
+
+function handleLoginError(data) {
+    console.error('Login error:', data);
+    showNotification('Login failed: ' + data.message, 'error');
+}
+
+function handleRegisterError(data) {
+    console.error('Registration error:', data);
+    showNotification('Registration failed: ' + data.message, 'error');
+}
+
+function handleRideRequested(data) {
+    console.log('Ride requested:', data);
+    showNotification('Ride request sent! ' + data.message, 'success');
+    // Update UI to show waiting status
+    updateRideStatus('waiting', data.rideId, data.estimatedWait);
+}
+
+function handleRideAccepted(data) {
+    console.log('Ride accepted:', data);
+    showNotification('Ride accepted by ' + data.riderName, 'success');
+    // Update UI with rider details
+    updateRideStatus('accepted', data.rideId, data);
+}
+
+function handleRideCompleted(data) {
+    console.log('Ride completed:', data);
+    showNotification('Ride completed! Thank you!', 'success');
+    // Update UI
+    updateRideStatus('completed', data.rideId, data);
+}
+
+function handleRideError(data) {
+    console.error('Ride error:', data);
+    showNotification('Ride error: ' + data.message, 'error');
+}
+
+function handleNewRideRequest(data) {
+    console.log('New ride request:', data);
+    
+    // Play sound notification
+    playNotificationSound();
+    
+    // Show visual notification
+    if (Notification.permission === 'granted') {
+        new Notification('New Ride Request!', {
+            body: `From: ${data.pickup}\nTo: ${data.destination}\nCustomer: ${data.customerName}`,
+            icon: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png'
+        });
+    }
+    
+    // Add to ride requests list in UI
+    addRideRequestToList(data);
+}
+
+function handleRideConfirmed(data) {
+    console.log('Ride confirmed:', data);
+    showNotification('Ride confirmed! Customer: ' + data.customerName, 'success');
+    // Show current ride in UI
+    showCurrentRide(data);
+}
+
+function handleRideCompletedRider(data) {
+    console.log('Ride completed (rider):', data);
+    showNotification('Ride completed! Earnings: $' + data.earnings, 'success');
+    // Update earnings display
+    updateEarningsDisplay(data.earnings, data.totalRides);
+}
+
+function handleRideTaken(data) {
+    console.log('Ride taken by someone else:', data);
+    // Remove this ride from requests list
+    removeRideRequest(data.rideId);
+}
+
+function handleAvailableRides(rides) {
+    console.log('Available rides:', rides.length);
+    // Display available rides for rider
+    displayAvailableRides(rides);
+}
+
+function handleComplaintSubmitted(data) {
+    console.log('Complaint submitted:', data);
+    showNotification('Complaint submitted successfully!', 'success');
+}
+
+function handleComplaintUpdated(data) {
+    console.log('Complaint updated:', data);
+    showNotification('Complaint status: ' + data.status, 'info');
+}
+
+// ==================== HELPER FUNCTIONS ====================
+function updateConnectionStatus(status) {
+    const statusElement = document.getElementById('connectionStatus');
+    if (statusElement) {
+        statusElement.textContent = status === 'connected' ? '🟢 Online' : '🔴 Offline';
+        statusElement.style.color = status === 'connected' ? '#4CAF50' : '#f44336';
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `status-message status-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Add to page
+    const container = document.querySelector('.main-content') || document.body;
+    container.prepend(notification);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+function playNotificationSound() {
+    // Create audio element for notification sound
+    try {
+        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+        audio.volume = 0.3;
+        audio.play();
+    } catch (error) {
+        console.log('Sound play failed:', error);
+    }
+}
+
+function showRiderDashboard(data) {
+    // Implement based on your existing UI
+    document.getElementById('riderLoginSection').style.display = 'none';
+    document.getElementById('riderDashboard').style.display = 'block';
+    
+    // Update rider info
+    if (data.user) {
+        document.getElementById('riderNameDisplay').textContent = data.user.name;
+        document.getElementById('riderEarnings').textContent = '$' + (data.user.earnings || 0);
+        document.getElementById('riderTotalRides').textContent = data.user.totalRides || 0;
+        document.getElementById('riderRating').textContent = data.user.rating || '5.0';
+    }
+}
+
+function showCustomerDashboard(data) {
+    // Implement based on your existing UI
+    document.getElementById('customerLoginSection').style.display = 'none';
+    document.getElementById('customerDashboard').style.display = 'block';
+    
+    // Update customer info
+    if (data.user) {
+        document.getElementById('customerNameDisplay').textContent = data.user.name;
+    }
+}
+
+// ==================== INITIALIZE ON PAGE LOAD ====================
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSocket();
+    
+    // Check if user is already logged in
+    const riderData = localStorage.getItem('riderData');
+    const customerData = localStorage.getItem('customerData');
+    
+    if (riderData) {
+        currentUser = JSON.parse(riderData);
+        currentUser.type = 'rider';
+        showRiderDashboard({ user: currentUser });
+    } else if (customerData) {
+        currentUser = JSON.parse(customerData);
+        currentUser.type = 'customer';
+        showCustomerDashboard({ user: currentUser });
+    }
+    
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+});
+
+// ==================== MAKE FUNCTIONS GLOBAL ====================
+window.customerRegister = customerRegister;
+window.customerLogin = customerLogin;
+window.requestRide = requestRide;
+window.submitComplaint = submitComplaint;
+window.riderLogin = riderLogin;
+window.updateRiderStatus = updateRiderStatus;
+window.acceptRide = acceptRide;
+window.completeRide = completeRide;
+    </script>
 </body>
 </html>
