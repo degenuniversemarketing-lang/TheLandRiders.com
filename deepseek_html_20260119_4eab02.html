@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE LAND RIDERS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2E7D32;
+            --light-green: #4CAF50;
+            --yellow: #FFD600;
+            --white: #FFFFFF;
+            --black: #212121;
+            --gray: #757575;
+            --light-gray: #f5f5f5;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--black);
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: var(--shadow);
+            min-height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .app-header {
+            background: linear-gradient(to right, var(--primary-green), var(--light-green));
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+            margin-right: 10px;
+            color: var(--yellow);
+        }
+        
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        
+        .header-right {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .language-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: var(--white);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .profile-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        /* App Selection Screen */
+        .selection-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+            text-align: center;
+        }
+        
+        .app-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 2rem;
+        }
+        
+        .app-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            color: var(--black);
+            transition: transform 0.3s;
+            border: 3px solid transparent;
+        }
+        
+        .app-option:hover {
+            transform: translateY(-5px);
+            border-color: var(--yellow);
+        }
+        
+        .app-option.customer {
+            border-top: 5px solid var(--primary-green);
+        }
+        
+        .app-option.rider {
+            border-top: 5px solid var(--warning);
+        }
+        
+        .app-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+        }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .app-description {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Auth Screens */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 70vh;
+        }
+        
+        .auth-box {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border-top: 5px solid var(--yellow);
+        }
+        
+        .auth-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-green);
+            text-align: center;
+        }
+        
+        .auth-subtitle {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--gray);
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--black);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: var(--light-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        
+        .btn {
+            display: block;
+            background: linear-gradient(to right, var(--primary-green), var(--light-green));
+            color: var(--white);
+            padding: 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+        }
+        
+        .btn-yellow {
+            background: linear-gradient(to right, var(--yellow), #FFC107);
+            color: var(--black);
+        }
+        
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--black);
+            border: 2px solid #ddd;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, var(--danger), #f44336);
+            color: var(--white);
+        }
+        
+        .auth-switch {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray);
+        }
+        
+        .auth-switch a {
+            color: var(--primary-green);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        
+        .forgot-password a {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        /* Registration Steps */
+        .registration-step {
+            display: none;
+        }
+        
+        .registration-step.active {
+            display: block;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ddd;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            z-index: 1;
+        }
+        
+        .step.active .step-number {
+            background-color: var(--primary-green);
+            color: var(--white);
+        }
+        
+        .step.completed .step-number {
+            background-color: var(--yellow);
+            color: var(--black);
+        }
+        
+        .step-title {
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-align: center;
+        }
+        
+        .step.active .step-title {
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+        
+        .step-line {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: #ddd;
+            z-index: 0;
+        }
+        
+        /* Customer Dashboard */
+        .dashboard-section {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+        }
+        
+        .location-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .location-field {
+            display: flex;
+            align-items: center;
+            background-color: var(--white);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        
+        .location-icon {
+            font-size: 1.2rem;
+            color: var(--primary-green);
+            margin-right: 12px;
+        }
+        
+        /* Map Options */
+        .map-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .map-option-btn {
+            flex: 1;
+            background: var(--white);
+            border: 2px solid #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .map-option-btn.active {
+            border-color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.1);
+        }
+        
+        .map-option-btn i {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 5px;
+        }
+        
+        .map-container {
+            height: 200px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .map-placeholder {
+            text-align: center;
+            color: var(--gray);
+        }
+        
+        /* Ride Offers */
+        .offer-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--yellow);
+        }
+        
+        .offer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .rider-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+        
+        .offer-price {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--black);
+        }
+        
+        .offer-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .detail-icon {
+            color: var(--primary-green);
+            margin-right: 6px;
+            font-size: 1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.8rem;
+        }
+        
+        .btn-small {
+            padding: 10px;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+        
+        /* Status Messages */
+        .status-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-success {
+            background-color: #E8F5E9;
+            color: var(--primary-green);
+            border-left: 4px solid var(--light-green);
+        }
+        
+        .status-error {
+            background-color: #FFEBEE;
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .status-info {
+            background-color: #E3F2FD;
+            color: #2196F3;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .status-warning {
+            background-color: #FFF8E1;
+            color: var(--warning);
+            border-left: 4px solid var(--warning);
+        }
+        
+        .status-icon {
+            font-size: 1.2rem;
+            margin-right: 12px;
+        }
+        
+        /* Active Ride */
+        .active-ride-card {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .ride-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background-color: rgba(255,255,255,0.2);
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .ride-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        /* Rider Dashboard */
+        .rider-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .ride-requests {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .request-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--warning);
+        }
+        
+        /* Profile */
+        .profile-image-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-green);
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--primary-green);
+        }
+        
+        .profile-info {
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* Footer */
+        .app-footer {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .complaint-btn {
+            background-color: var(--yellow);
+            color: var(--black);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .complaint-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 214, 0, 0.4);
+        }
+        
+        .office-map {
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 150px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .map-link {
+            text-decoration: none;
+            color: var(--primary-green);
+            font-weight: 600;
+            background-color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .privacy-policy {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        
+        .privacy-policy h4 {
+            margin-bottom: 0.8rem;
+            color: var(--yellow);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            color: var(--primary-green);
+        }
+        
+        .close-modal {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        /* Rating */
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .rating-star {
+            font-size: 1.5rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .rating-star.active {
+            color: var(--yellow);
+        }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Rider Signup Info */
+        .rider-signup-info {
+            background-color: #FFF8E1;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .contact-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .contact-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+        }
+        
+        .call-btn {
+            background-color: var(--primary-green);
+            color: white;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .auth-box {
+                padding: 1.5rem;
+            }
+            
+            .offer-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .ride-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .rider-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header" id="appHeader">
+            <!-- Header content loaded dynamically -->
+        </header>
+        
+        <main class="main-content" id="mainContent">
+            <!-- Main content loaded dynamically -->
+        </main>
+        
+        <footer class="app-footer">
+            <button class="complaint-btn" id="complaintBtn">
+                <i class="fas fa-exclamation-triangle"></i> Submit a Complaint
+            </button>
+            
+            <div class="office-map">
+                <a href="https://maps.app.goo.gl/8iYb6rfkB5zRsQEdA" class="map-link" target="_blank">
+                    <i class="fas fa-map-marker-alt"></i> View Our Office on Google Maps
+                </a>
+            </div>
+            
+            <div class="privacy-policy">
+                <h4>Privacy Policy</h4>
+                <p>THE LAND RIDERS respects your privacy. We collect only necessary information to provide our services.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Complaint Modal -->
+    <div class="modal" id="complaintModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Submit Complaint</h3>
+                <span class="close-modal" id="closeComplaintModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Your Contact (Email or Phone)</label>
+                <input type="text" class="form-input" id="complainantContact" placeholder="Email or phone number" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rider Name</label>
+                <input type="text" class="form-input" id="complaintRiderName" placeholder="Name of the rider" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Complaint Details</label>
+                <textarea class="form-input" id="complaintDetails" rows="4" placeholder="Please describe what happened..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rate the Rider (Optional)</label>
+                <div class="rating-stars">
+                    <i class="far fa-star rating-star" data-rating="1"></i>
+                    <i class="far fa-star rating-star" data-rating="2"></i>
+                    <i class="far fa-star rating-star" data-rating="3"></i>
+                    <i class="far fa-star rating-star" data-rating="4"></i>
+                    <i class="far fa-star rating-star" data-rating="5"></i>
+                </div>
+            </div>
+            <button class="btn" id="submitComplaint">Submit Complaint</button>
+        </div>
+    </div>
+    
+    <!-- Cancel Ride Modal -->
+    <div class="modal" id="cancelRideModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Cancel Ride</h3>
+                <span class="close-modal" id="closeCancelModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Why are you cancelling this ride?</label>
+                <select class="form-input" id="cancelReason">
+                    <option value="">Select a reason</option>
+                    <option value="rider_late">Rider is too late</option>
+                    <option value="fare_issue">Fare issue</option>
+                    <option value="wrong_location">Wrong pickup location</option>
+                    <option value="personal_reason">Personal reason</option>
+                    <option value="rider_rude">Rider was rude</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Additional Details (Optional)</label>
+                <textarea class="form-input" id="cancelDetails" rows="3" placeholder="Provide more details..."></textarea>
+            </div>
+            <button class="btn btn-danger" id="confirmCancelRide">Cancel Ride</button>
+        </div>
+    </div>
+    
+    <!-- Cancel Ride Modal for Rider -->
+    <div class="modal" id="cancelRideModalRider">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Cancel Ride Request</h3>
+                <span class="close-modal" id="closeCancelModalRider">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Why are you cancelling this ride request?</label>
+                <select class="form-input" id="cancelReasonRider">
+                    <option value="">Select a reason</option>
+                    <option value="too_far">Too far from pickup</option>
+                    <option value="customer_not_responding">Customer not responding</option>
+                    <option value="vehicle_issue">Vehicle issue</option>
+                    <option value="personal_reason">Personal reason</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Additional Details (Optional)</label>
+                <textarea class="form-input" id="cancelDetailsRider" rows="3" placeholder="Provide more details..."></textarea>
+            </div>
+            <button class="btn btn-danger" id="confirmCancelRideRider">Cancel Ride Request</button>
+        </div>
+    </div>
+    
+    <!-- Send Offer Modal -->
+    <div class="modal" id="sendOfferModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Send Ride Offer</h3>
+                <span class="close-modal" id="closeOfferModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Your Fare (PKR)</label>
+                <input type="number" class="form-input" id="offerFare" placeholder="Enter fare amount" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Estimated Arrival Time (minutes)</label>
+                <input type="number" class="form-input" id="offerArrivalTime" placeholder="Estimated minutes to arrival" required>
+            </div>
+            <button class="btn" id="submitOffer">Send Offer</button>
+        </div>
+    </div>
+
+    <script>
+        // Database Service
+        class DatabaseService {
+            static getCustomers() {
+                return JSON.parse(localStorage.getItem('customers')) || [];
+            }
+            
+            static saveCustomers(customers) {
+                localStorage.setItem('customers', JSON.stringify(customers));
+            }
+            
+            static getRiders() {
+                return JSON.parse(localStorage.getItem('riders')) || [];
+            }
+            
+            static saveRiders(riders) {
+                localStorage.setItem('riders', JSON.stringify(riders));
+            }
+            
+            static getRides() {
+                return JSON.parse(localStorage.getItem('rides')) || [];
+            }
+            
+            static saveRides(rides) {
+                localStorage.setItem('rides', JSON.stringify(rides));
+            }
+            
+            static getComplaints() {
+                return JSON.parse(localStorage.getItem('complaints')) || [];
+            }
+            
+            static saveComplaints(complaints) {
+                localStorage.setItem('complaints', JSON.stringify(complaints));
+            }
+            
+            static getCancelledRides() {
+                return JSON.parse(localStorage.getItem('cancelledRides')) || [];
+            }
+            
+            static saveCancelledRides(cancelledRides) {
+                localStorage.setItem('cancelledRides', JSON.stringify(cancelledRides));
+            }
+            
+            static getActiveRideRequests() {
+                return JSON.parse(localStorage.getItem('activeRideRequests')) || [];
+            }
+            
+            static saveActiveRideRequests(requests) {
+                localStorage.setItem('activeRideRequests', JSON.stringify(requests));
+            }
+            
+            static getActiveOffers() {
+                return JSON.parse(localStorage.getItem('activeOffers')) || [];
+            }
+            
+            static saveActiveOffers(offers) {
+                localStorage.setItem('activeOffers', JSON.stringify(offers));
+            }
+        }
+
+        // Application State
+        const state = {
+            currentUser: null,
+            userType: null,
+            currentRideRequestId: null,
+            offers: [],
+            activeRide: null,
+            rideRequests: [],
+            selectedRequest: null,
+            currentStep: 1,
+            language: localStorage.getItem('appLanguage') || 'en',
+            isRiderOnline: false,
+            registrationData: null,
+            socket: null
+        };
+
+        // Translation Service
+        const translations = {
+            en: {
+                // Common
+                submit_complaint: "Submit a Complaint",
+                view_office: "View Our Office on Google Maps",
+                privacy_policy: "Privacy Policy",
+                privacy_text: "THE LAND RIDERS respects your privacy.",
+                back: "Back",
+                logout: "Logout",
+                loading: "Loading...",
+                cancel: "Cancel",
+                submit: "Submit",
+                confirm: "Confirm",
+                success: "Success",
+                error: "Error",
+                warning: "Warning",
+                info: "Info",
+                
+                // App Selection
+                choose_role: "Choose your role to continue",
+                customer: "Customer",
+                customer_desc: "Book rides & travel safely",
+                rider: "Rider",
+                rider_desc: "Provide rides & earn money",
+                need_help: "Need help? Contact us",
+                
+                // Login
+                customer_login: "Customer Login",
+                rider_login: "Rider Login",
+                enter_credentials: "Enter your credentials",
+                phone_number: "Phone Number",
+                rider_name: "Rider Name",
+                rider_id: "Rider ID",
+                password: "Password",
+                forgot_password: "Forgot Password?",
+                login: "Login",
+                no_account: "Don't have an account?",
+                register: "Register",
+                have_account: "Already have an account?",
+                sign_up: "Sign Up",
+                
+                // Registration
+                customer_registration: "Customer Registration",
+                create_account: "Create your account",
+                phone: "Phone",
+                full_name: "Full Name",
+                email_optional: "Email (Optional)",
+                create_password: "Create Password",
+                confirm_password: "Confirm Password",
+                send_otp: "Send OTP",
+                continue: "Continue",
+                create_account_btn: "Create Account",
+                
+                // Rider Registration
+                rider_signup: "Rider Sign Up",
+                join_team: "Join our team",
+                important_info: "Important Information",
+                rider_info_text: "Contact admin for verification",
+                whatsapp_number: "WhatsApp Number",
+                submit_request: "Submit Request",
+                contact_admin: "Contact Admin",
+                rider_login_prompt: "Already have rider account?",
+                
+                // Forgot Password
+                reset_password: "Reset Password",
+                enter_phone_reset: "Enter phone to reset password",
+                send_otp_reset: "Send OTP",
+                remember_password: "Remember password?",
+                
+                // Customer Dashboard
+                book_ride: "Book a Ride",
+                enter_manually: "Enter Manually",
+                use_map: "Use Map",
+                pickup_location: "Pickup Location",
+                destination: "Destination",
+                search_riders: "Search Available Riders",
+                ride_offers: "Ride Offers",
+                waiting_offers: "Waiting for Offers...",
+                finding_riders: "Finding available riders",
+                active_ride: "ACTIVE RIDE",
+                ride_progress: "Ride in Progress",
+                from: "From",
+                to: "To",
+                track_ride: "Track Ride",
+                
+                // Ride Offers
+                mins_away: "mins away",
+                accept: "Accept",
+                details: "Details",
+                cancel_ride: "Cancel Ride",
+                
+                // Rider Dashboard
+                rider_dashboard: "Rider Dashboard",
+                completed_rides: "Completed Rides",
+                total_earnings: "Total Earnings",
+                go_online: "Go Online",
+                go_offline: "Go Offline",
+                available_ride_requests: "Available Ride Requests",
+                no_requests: "No ride requests",
+                send_offer: "Send Offer",
+                cancel_request: "Cancel",
+                
+                // Modals
+                rider_details: "Rider Details",
+                vehicle: "Vehicle",
+                plate_number: "Plate Number",
+                rating: "Rating",
+                arrival_time: "Arrival Time",
+                close: "Close",
+                cancel_reason: "Cancel reason",
+                select_reason: "Select reason",
+                rider_late: "Rider late",
+                fare_issue: "Fare issue",
+                wrong_location: "Wrong location",
+                personal_reason: "Personal reason",
+                rider_rude: "Rider rude",
+                other: "Other",
+                additional_details: "Additional Details",
+                cancel_reason_rider: "Cancel reason",
+                too_far: "Too far",
+                customer_not_responding: "Not responding",
+                vehicle_issue: "Vehicle issue",
+                send_ride_offer: "Send Ride Offer",
+                your_fare: "Your Fare (PKR)",
+                estimated_arrival: "Arrival Time (minutes)",
+                
+                // Complaint Modal
+                contact_info: "Your Contact",
+                complaint_details: "Complaint Details",
+                rate_rider: "Rate the Rider",
+                
+                // Profile
+                customer_profile: "Customer Profile",
+                rider_profile: "Rider Profile",
+                professional_rider: "Professional Rider",
+                phone_number_colon: "Phone Number",
+                total_rides_colon: "Total Rides",
+                member_since: "Member Since",
+                rider_id_colon: "Rider ID",
+                vehicle_type: "Vehicle Type",
+                
+                // Messages
+                login_success: "Login successful!",
+                account_created: "Account created!",
+                request_submitted: "Request submitted!",
+                rider_added: "Rider added!",
+                searching_riders: "Searching riders...",
+                riders_available: "riders available",
+                ride_accepted: "Ride accepted!",
+                complaint_submitted: "Complaint submitted!",
+                you_online: "You are online",
+                you_offline: "You are offline",
+                new_ride_request: "New ride request!",
+                offer_sent: "Offer sent!",
+                ride_cancelled: "Ride cancelled!"
+            },
+            ur: {
+                submit_complaint: "شکایت درج کریں",
+                view_office: "دفتر دیکھیں",
+                privacy_policy: "پرائیویسی پالیسی",
+                privacy_text: "دی لینڈ رائڈرز رازداری کا احترام کرتا ہے۔",
+                back: "واپس",
+                logout: "لاگ آؤٹ",
+                loading: "لوڈ ہو رہا ہے...",
+                cancel: "منسوخ کریں",
+                submit: "جمع کروائیں",
+                confirm: "تصدیق کریں",
+                success: "کامیابی",
+                error: "خرابی",
+                warning: "انتباہ",
+                info: "معلومات",
+                choose_role: "کردار منتخب کریں",
+                customer: "کسٹمر",
+                customer_desc: "سفر بک کریں",
+                rider: "رائیڈر",
+                rider_desc: "سفر فراہم کریں",
+                need_help: "مدد چاہیے؟",
+                customer_login: "کسٹمر لاگ ان",
+                rider_login: "رائیڈر لاگ ان",
+                enter_credentials: "کریڈنشلز درج کریں",
+                phone_number: "فون نمبر",
+                rider_name: "رائیڈر کا نام",
+                rider_id: "رائیڈر آئی ڈی",
+                password: "پاس ورڈ",
+                forgot_password: "پاس ورڈ بھول گئے؟",
+                login: "لاگ ان",
+                no_account: "اکاؤنٹ نہیں ہے؟",
+                register: "رجسٹر کریں",
+                have_account: "پہلے سے اکاؤنٹ ہے؟",
+                sign_up: "سائن اپ",
+                customer_registration: "کسٹمر رجسٹریشن",
+                create_account: "اکاؤنٹ بنائیں",
+                phone: "فون",
+                full_name: "پورا نام",
+                email_optional: "ای میل (اختیاری)",
+                create_password: "پاس ورڈ بنائیں",
+                confirm_password: "پاس ورڈ کی تصدیق کریں",
+                send_otp: "OTP بھیجیں",
+                continue: "جاری رکھیں",
+                create_account_btn: "اکاؤنٹ بنائیں",
+                rider_signup: "رائیڈر سائن اپ",
+                join_team: "ٹیم میں شامل ہوں",
+                important_info: "اہم معلومات",
+                rider_info_text: "ایڈمن سے رابطہ کریں",
+                whatsapp_number: "واٹس ایپ نمبر",
+                submit_request: "درخواست جمع کروائیں",
+                contact_admin: "ایڈمن سے رابطہ کریں",
+                rider_login_prompt: "پہلے سے رائیڈر اکاؤنٹ ہے؟",
+                reset_password: "پاس ورڈ ری سیٹ کریں",
+                enter_phone_reset: "فون نمبر درج کریں",
+                send_otp_reset: "OTP بھیجیں",
+                remember_password: "پاس ورڈ یاد ہے؟",
+                book_ride: "سفر بک کریں",
+                enter_manually: "دستی درج کریں",
+                use_map: "نقشہ استعمال کریں",
+                pickup_location: "پک اپ مقام",
+                destination: "منزل",
+                search_riders: "رائیڈرز تلاش کریں",
+                ride_offers: "سفر کی پیشکشیں",
+                waiting_offers: "پیشکشوں کا انتظار",
+                finding_riders: "رائیڈرز تلاش کیے جا رہے ہیں",
+                active_ride: "فعال سفر",
+                ride_progress: "سفر جاری ہے",
+                from: "سے",
+                to: "تک",
+                track_ride: "سفر ٹریک کریں",
+                mins_away: "منٹ دور",
+                accept: "قبول کریں",
+                details: "تفصیلات",
+                cancel_ride: "سفر منسوخ کریں",
+                rider_dashboard: "رائیڈر ڈیش بورڈ",
+                completed_rides: "مکمل شدہ سفریں",
+                total_earnings: "کل آمدنی",
+                go_online: "آن لائن جائیں",
+                go_offline: "آف لائن جائیں",
+                available_ride_requests: "دستیاب درخواستیں",
+                no_requests: "کوئی درخواست نہیں",
+                send_offer: "پیشکش بھیجیں",
+                cancel_request: "منسوخ کریں",
+                rider_details: "رائیڈر کی تفصیلات",
+                vehicle: "گاڑی",
+                plate_number: "نمبر پلیٹ",
+                rating: "درجہ بندی",
+                arrival_time: "پہنچنے کا وقت",
+                close: "بند کریں",
+                cancel_reason: "منسوخ کرنے کی وجہ",
+                select_reason: "وجہ منتخب کریں",
+                rider_late: "رائیڈر دیر کر رہا ہے",
+                fare_issue: "کرایہ کا مسئلہ",
+                wrong_location: "غلط مقام",
+                personal_reason: "ذاتی وجہ",
+                rider_rude: "رائیڈر بدتمیز تھا",
+                other: "دیگر",
+                additional_details: "اضافی تفصیلات",
+                cancel_reason_rider: "منسوخ کرنے کی وجہ",
+                too_far: "بہت دور",
+                customer_not_responding: "جواب نہیں دے رہا",
+                vehicle_issue: "گاڑی کا مسئلہ",
+                send_ride_offer: "سفر کی پیشکش بھیجیں",
+                your_fare: "آپ کا کرایہ (PKR)",
+                estimated_arrival: "پہنچنے کا وقت (منٹ)",
+                contact_info: "آپ کا رابطہ",
+                complaint_details: "شکایت کی تفصیلات",
+                rate_rider: "رائیڈر کو درجہ دیں",
+                customer_profile: "کسٹمر پروفائل",
+                rider_profile: "رائیڈر پروفائل",
+                professional_rider: "پیشہ ور رائیڈر",
+                phone_number_colon: "فون نمبر",
+                total_rides_colon: "کل سفریں",
+                member_since: "رکنیت کی تاریخ",
+                rider_id_colon: "رائیڈر آئی ڈی",
+                vehicle_type: "گاڑی کی قسم",
+                login_success: "لاگ ان کامیاب!",
+                account_created: "اکاؤنٹ بن گیا!",
+                request_submitted: "درخواست جمع ہو گئی!",
+                rider_added: "رائیڈر شامل ہو گیا!",
+                searching_riders: "رائیڈرز تلاش ہو رہے ہیں...",
+                riders_available: "رائیڈرز دستیاب",
+                ride_accepted: "سفر قبول ہو گیا!",
+                complaint_submitted: "شکایت جمع ہو گئی!",
+                you_online: "آپ آن لائن ہیں",
+                you_offline: "آپ آف لائن ہیں",
+                new_ride_request: "نئی درخواست!",
+                offer_sent: "پیشکش بھیج دی!",
+                ride_cancelled: "سفر منسوخ ہو گیا!"
+            }
+        };
+
+        // WebSocket Service
+        class WebSocketService {
+            static instance = null;
+            static callbacks = {
+                onRideRequest: [],
+                onNewOffer: [],
+                onOfferAccepted: [],
+                onRideCancelled: []
+            };
+
+            static connect() {
+                if (this.instance) return this.instance;
+
+                // Simulate WebSocket with localStorage events
+                this.instance = {
+                    emit: (event, data) => {
+                        console.log('Emitting:', event, data);
+                        
+                        // Handle different events
+                        switch(event) {
+                            case 'rideRequest':
+                                this.broadcastRideRequest(data);
+                                break;
+                            case 'sendOffer':
+                                this.broadcastOffer(data);
+                                break;
+                            case 'offerAccepted':
+                                this.broadcastOfferAccepted(data);
+                                break;
+                            case 'riderStatus':
+                                this.updateRiderStatus(data);
+                                break;
+                            case 'newComplaint':
+                                this.broadcastComplaint(data);
+                                break;
+                            case 'rideCancelled':
+                                this.broadcastRideCancelled(data);
+                                break;
+                        }
+                    },
+                    
+                    on: (event, callback) => {
+                        if (!this.callbacks[event]) this.callbacks[event] = [];
+                        this.callbacks[event].push(callback);
+                    }
+                };
+
+                // Set up storage event listener for cross-tab communication
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'ride_requests') {
+                        const requests = JSON.parse(e.newValue || '[]');
+                        const latestRequest = requests[requests.length - 1];
+                        if (latestRequest) {
+                            this.callbacks.onRideRequest.forEach(cb => cb(latestRequest));
+                        }
+                    }
+                    if (e.key === 'active_offers') {
+                        const offers = JSON.parse(e.newValue || '[]');
+                        const latestOffer = offers[offers.length - 1];
+                        if (latestOffer) {
+                            this.callbacks.onNewOffer.forEach(cb => cb(latestOffer));
+                        }
+                    }
+                });
+
+                return this.instance;
+            }
+
+            static broadcastRideRequest(request) {
+                // Save to localStorage for persistence
+                const requests = DatabaseService.getActiveRideRequests();
+                requests.push(request);
+                DatabaseService.saveActiveRideRequests(requests);
+                
+                // Broadcast to all tabs
+                localStorage.setItem('ride_requests', JSON.stringify(requests));
+                localStorage.setItem('ride_request_broadcast', Date.now().toString());
+                
+                // Notify riders in current tab
+                if (state.userType === 'rider' && state.isRiderOnline) {
+                    this.callbacks.onRideRequest.forEach(cb => cb(request));
+                }
+            }
+
+            static broadcastOffer(offer) {
+                const offers = DatabaseService.getActiveOffers();
+                offers.push(offer);
+                DatabaseService.saveActiveOffers(offers);
+                
+                localStorage.setItem('active_offers', JSON.stringify(offers));
+                localStorage.setItem('offer_broadcast', Date.now().toString());
+                
+                // Find the ride request and notify customer
+                if (state.userType === 'customer' && state.currentRideRequestId === offer.requestId) {
+                    this.callbacks.onNewOffer.forEach(cb => cb(offer));
+                }
+            }
+
+            static broadcastOfferAccepted(data) {
+                // Remove from active requests and offers
+                let requests = DatabaseService.getActiveRideRequests();
+                requests = requests.filter(r => r.requestId !== data.requestId);
+                DatabaseService.saveActiveRideRequests(requests);
+                
+                let offers = DatabaseService.getActiveOffers();
+                offers = offers.filter(o => o.requestId !== data.requestId);
+                DatabaseService.saveActiveOffers(offers);
+                
+                // Create ride record
+                const rides = DatabaseService.getRides();
+                const ride = {
+                    id: 'ride_' + Date.now(),
+                    ...data,
+                    status: 'active',
+                    startTime: new Date().toISOString()
+                };
+                rides.push(ride);
+                DatabaseService.saveRides(rides);
+                
+                this.callbacks.onOfferAccepted.forEach(cb => cb(data));
+            }
+
+            static updateRiderStatus(data) {
+                const riders = DatabaseService.getRiders();
+                const rider = riders.find(r => r.id === data.riderId);
+                if (rider) {
+                    rider.status = data.status;
+                    DatabaseService.saveRiders(riders);
+                }
+            }
+
+            static broadcastComplaint(complaint) {
+                const complaints = DatabaseService.getComplaints();
+                complaints.push(complaint);
+                DatabaseService.saveComplaints(complaints);
+            }
+
+            static broadcastRideCancelled(cancelledRide) {
+                const cancelledRides = DatabaseService.getCancelledRides();
+                cancelledRides.push(cancelledRide);
+                DatabaseService.saveCancelledRides(cancelledRides);
+            }
+        }
+
+        // Main Application
+        class CustomerRiderApp {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.checkLanguage();
+                this.showAppSelection();
+                this.setupEventListeners();
+                this.setupWebSocket();
+            }
+
+            checkLanguage() {
+                if (state.language === 'ur') {
+                    document.body.style.direction = 'rtl';
+                }
+            }
+
+            updateHeader(showBack = false, showProfile = false, showLanguage = true) {
+                const header = document.getElementById('appHeader');
+                header.innerHTML = `
+                    ${showBack ? `
+                        <button class="back-btn" id="backBtn">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    ` : ''}
+                    
+                    <div class="logo-container">
+                        <i class="fas fa-motorcycle logo-icon"></i>
+                        <h1 class="logo-text">THE LAND RIDERS</h1>
+                    </div>
+                    
+                    <div class="header-right">
+                        ${showLanguage ? `
+                            <button class="language-btn" id="languageBtn">
+                                ${state.language === 'en' ? 'اردو' : 'EN'}
+                            </button>
+                        ` : ''}
+                        
+                        ${showProfile ? `
+                            <button class="profile-btn" id="profileBtn">
+                                <i class="fas fa-user-circle"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+
+                if (showBack) {
+                    document.getElementById('backBtn').addEventListener('click', () => {
+                        this.handleBack();
+                    });
+                }
+
+                if (showProfile) {
+                    document.getElementById('profileBtn').addEventListener('click', () => {
+                        if (state.currentUser) {
+                            if (state.userType === 'customer') {
+                                this.showCustomerProfile();
+                            } else {
+                                this.showRiderProfile();
+                            }
+                        }
+                    });
+                }
+
+                if (showLanguage) {
+                    document.getElementById('languageBtn').addEventListener('click', () => {
+                        this.toggleLanguage();
+                    });
+                }
+            }
+
+            toggleLanguage() {
+                state.language = state.language === 'en' ? 'ur' : 'en';
+                localStorage.setItem('appLanguage', state.language);
+                
+                if (state.language === 'ur') {
+                    document.body.style.direction = 'rtl';
+                } else {
+                    document.body.style.direction = 'ltr';
+                }
+                
+                // Refresh current view
+                if (state.currentUser) {
+                    if (state.userType === 'customer') {
+                        this.showCustomerDashboard();
+                    } else {
+                        this.showRiderDashboard();
+                    }
+                } else {
+                    this.showAppSelection();
+                }
+            }
+
+            showAppSelection() {
+                this.updateHeader(false, false, true);
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="selection-screen">
+                        <div class="logo-container">
+                            <i class="fas fa-motorcycle logo-icon"></i>
+                            <h1 class="logo-text">THE LAND RIDERS</h1>
+                        </div>
+                        <p style="color: var(--gray); margin-top: 1rem;">
+                            Choose your role to continue
+                        </p>
+                        
+                        <div class="app-options">
+                            <a href="#" class="app-option customer" id="customerOption">
+                                <i class="fas fa-user app-icon"></i>
+                                <div class="app-title">Customer</div>
+                                <div class="app-description">Book rides & travel safely</div>
+                            </a>
+                            
+                            <a href="#" class="app-option rider" id="riderOption">
+                                <i class="fas fa-motorcycle app-icon"></i>
+                                <div class="app-title">Rider</div>
+                                <div class="app-description">Provide rides & earn money</div>
+                            </a>
+                        </div>
+                        
+                        <div style="margin-top: 2rem; color: var(--gray); font-size: 0.9rem;">
+                            <p>Need help? Contact us: 0301-3036146</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('customerOption').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    state.userType = 'customer';
+                    this.checkAuth();
+                });
+
+                document.getElementById('riderOption').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    state.userType = 'rider';
+                    this.checkAuth();
+                });
+            }
+
+            handleBack() {
+                if (state.userType === 'customer') {
+                    if (state.currentUser) {
+                        this.showCustomerDashboard();
+                    } else {
+                        this.showLogin('customer');
+                    }
+                } else if (state.userType === 'rider') {
+                    if (state.currentUser) {
+                        this.showRiderDashboard();
+                    } else {
+                        this.showLogin('rider');
+                    }
+                } else {
+                    this.showAppSelection();
+                }
+            }
+
+            checkAuth() {
+                const token = localStorage.getItem(`${state.userType}Token`);
+                const userData = localStorage.getItem(`${state.userType}Data`);
+
+                if (token && userData) {
+                    state.currentUser = JSON.parse(userData);
+                    if (state.userType === 'customer') {
+                        this.showCustomerDashboard();
+                    } else {
+                        this.showRiderDashboard();
+                    }
+                } else {
+                    if (state.userType === 'customer') {
+                        this.showLogin('customer');
+                    } else {
+                        this.showLogin('rider');
+                    }
+                }
+            }
+
+            showLogin(userType) {
+                this.updateHeader(true, false, true);
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="auth-container">
+                        <div class="auth-box">
+                            <h2 class="auth-title">${userType === 'customer' ? 'Customer Login' : 'Rider Login'}</h2>
+                            <p class="auth-subtitle">Enter your credentials to continue</p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">${userType === 'customer' ? 'Phone Number' : 'Rider Name'}</label>
+                                <input type="text" class="form-input" id="loginUsername" 
+                                       placeholder="${userType === 'customer' ? '03XX-XXXXXXX' : 'Your name'}" required>
+                            </div>
+                            
+                            ${userType === 'rider' ? `
+                                <div class="form-group">
+                                    <label class="form-label">Rider ID</label>
+                                    <input type="text" class="form-input" id="loginRiderId" 
+                                           placeholder="5-digit ID" required>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-input" id="loginPassword" 
+                                       placeholder="••••••••" required>
+                            </div>
+                            
+                            ${userType === 'customer' ? `
+                                <div class="forgot-password">
+                                    <a href="#" id="forgotPassword">Forgot Password?</a>
+                                </div>
+                            ` : ''}
+                            
+                            <button class="btn" id="loginBtn">Login</button>
+                            
+                            <div class="auth-switch">
+                                ${userType === 'customer' ? 
+                                    "Don't have an account? <a href='#' id='switchToRegister'>Register</a>" : 
+                                    "New rider? <a href='#' id='switchToRegister'>Sign Up</a>"}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('loginBtn').addEventListener('click', () => {
+                    this.handleLogin(userType);
+                });
+
+                document.getElementById('switchToRegister').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (userType === 'customer') {
+                        this.showCustomerRegistration();
+                    } else {
+                        this.showRiderRegistration();
+                    }
+                });
+
+                if (userType === 'customer') {
+                    document.getElementById('forgotPassword').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.showForgotPassword();
+                    });
+                }
+            }
+
+            handleLogin(userType) {
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                const riderId = userType === 'rider' ? document.getElementById('loginRiderId').value : null;
+
+                if (userType === 'customer') {
+                    const customers = DatabaseService.getCustomers();
+                    const customer = customers.find(c => 
+                        c.phone === username && c.password === password
+                    );
+
+                    if (customer) {
+                        state.currentUser = customer;
+                        localStorage.setItem('customerToken', 'token_' + Date.now());
+                        localStorage.setItem('customerData', JSON.stringify(customer));
+                        this.showCustomerDashboard();
+                        this.showMessage('Login successful!', 'success');
+                    } else {
+                        this.showMessage('Invalid credentials', 'error');
+                    }
+                } else {
+                    const riders = DatabaseService.getRiders();
+                    const rider = riders.find(r => 
+                        r.name === username && r.id === riderId && r.password === password
+                    );
+
+                    if (rider) {
+                        state.currentUser = rider;
+                        localStorage.setItem('riderToken', 'token_' + Date.now());
+                        localStorage.setItem('riderData', JSON.stringify(rider));
+                        this.showRiderDashboard();
+                        this.showMessage('Login successful!', 'success');
+                    } else {
+                        this.showMessage('Invalid credentials', 'error');
+                    }
+                }
+            }
+
+            showCustomerRegistration() {
+                this.updateHeader(true, false, true);
+                state.currentStep = 1;
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="auth-container">
+                        <div class="auth-box">
+                            <h2 class="auth-title">Customer Registration</h2>
+                            <p class="auth-subtitle">Create your account in 3 simple steps</p>
+                            
+                            <div class="step-indicator">
+                                <div class="step ${state.currentStep >= 1 ? 'active' : ''} ${state.currentStep > 1 ? 'completed' : ''}">
+                                    <div class="step-number">1</div>
+                                    <div class="step-title">Phone</div>
+                                    <div class="step-line"></div>
+                                </div>
+                                <div class="step ${state.currentStep >= 2 ? 'active' : ''} ${state.currentStep > 2 ? 'completed' : ''}">
+                                    <div class="step-number">2</div>
+                                    <div class="step-title">Name</div>
+                                    <div class="step-line"></div>
+                                </div>
+                                <div class="step ${state.currentStep >= 3 ? 'active' : ''}">
+                                    <div class="step-number">3</div>
+                                    <div class="step-title">Password</div>
+                                </div>
+                            </div>
+                            
+                            <div id="stepContent"></div>
+                        </div>
+                    </div>
+                `;
+
+                this.loadRegistrationStep();
+            }
+
+            loadRegistrationStep() {
+                const stepContent = document.getElementById('stepContent');
+                
+                if (state.currentStep === 1) {
+                    stepContent.innerHTML = `
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-input" id="regPhone" 
+                                   placeholder="03XX-XXXXXXX" required>
+                            <small style="color: var(--gray); display: block; margin-top: 5px;">
+                                We'll send you a verification code
+                            </small>
+                        </div>
+                        <button class="btn" id="nextStepBtn">Send OTP</button>
+                        <div class="auth-switch">
+                            Already have an account? <a href="#" id="switchToLogin">Login</a>
+                        </div>
+                    `;
+                } else if (state.currentStep === 2) {
+                    stepContent.innerHTML = `
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="regName" 
+                                   placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email (Optional)</label>
+                            <input type="email" class="form-input" id="regEmail" 
+                                   placeholder="email@example.com">
+                        </div>
+                        <button class="btn" id="nextStepBtn">Continue</button>
+                        <button class="btn btn-secondary" id="prevStepBtn">Back</button>
+                    `;
+                } else if (state.currentStep === 3) {
+                    stepContent.innerHTML = `
+                        <div class="form-group">
+                            <label class="form-label">Create Password</label>
+                            <input type="password" class="form-input" id="regPassword" 
+                                   placeholder="Minimum 6 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-input" id="regConfirmPassword" 
+                                   placeholder="Re-enter your password" required>
+                        </div>
+                        <button class="btn" id="registerBtn">Create Account</button>
+                        <button class="btn btn-secondary" id="prevStepBtn">Back</button>
+                    `;
+                }
+
+                if (document.getElementById('nextStepBtn')) {
+                    document.getElementById('nextStepBtn').addEventListener('click', () => {
+                        if (state.currentStep === 1) {
+                            const phone = document.getElementById('regPhone').value;
+                            if (!phone.match(/^03\d{9}$/)) {
+                                this.showMessage('Invalid phone number', 'error');
+                                return;
+                            }
+                            
+                            const customers = DatabaseService.getCustomers();
+                            if (customers.some(c => c.phone === phone)) {
+                                this.showMessage('Phone already registered', 'error');
+                                return;
+                            }
+                            
+                            state.registrationData = { phone };
+                            state.currentStep = 2;
+                            this.loadRegistrationStep();
+                        } else if (state.currentStep === 2) {
+                            const name = document.getElementById('regName').value;
+                            const email = document.getElementById('regEmail').value;
+                            
+                            if (!name.trim()) {
+                                this.showMessage('Please enter your name', 'error');
+                                return;
+                            }
+                            
+                            state.registrationData = { ...state.registrationData, name, email };
+                            state.currentStep = 3;
+                            this.loadRegistrationStep();
+                        }
+                    });
+                }
+
+                if (document.getElementById('prevStepBtn')) {
+                    document.getElementById('prevStepBtn').addEventListener('click', () => {
+                        state.currentStep--;
+                        this.loadRegistrationStep();
+                    });
+                }
+
+                if (document.getElementById('registerBtn')) {
+                    document.getElementById('registerBtn').addEventListener('click', () => {
+                        this.registerCustomer();
+                    });
+                }
+
+                if (document.getElementById('switchToLogin')) {
+                    document.getElementById('switchToLogin').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.showLogin('customer');
+                    });
+                }
+            }
+
+            registerCustomer() {
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+                if (password.length < 6) {
+                    this.showMessage('Password must be at least 6 characters', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showMessage('Passwords do not match', 'error');
+                    return;
+                }
+
+                const customerData = {
+                    ...state.registrationData,
+                    password,
+                    id: 'cust_' + Date.now(),
+                    registrationDate: new Date().toISOString(),
+                    totalRides: 0,
+                    completedRides: []
+                };
+
+                const customers = DatabaseService.getCustomers();
+                customers.push(customerData);
+                DatabaseService.saveCustomers(customers);
+
+                state.currentUser = customerData;
+                localStorage.setItem('customerToken', 'token_' + Date.now());
+                localStorage.setItem('customerData', JSON.stringify(customerData));
+                
+                this.showCustomerDashboard();
+                this.showMessage('Account created successfully!', 'success');
+                state.currentStep = 1;
+            }
+
+            showRiderRegistration() {
+                this.updateHeader(true, false, true);
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="auth-container">
+                        <div class="auth-box">
+                            <h2 class="auth-title">Rider Sign Up</h2>
+                            <p class="auth-subtitle">Join our team of professional riders</p>
+                            
+                            <div class="rider-signup-info">
+                                <h4 style="color: var(--warning); margin-bottom: 10px;">
+                                    <i class="fas fa-info-circle"></i> Important Information
+                                </h4>
+                                <p>To become a rider, you need to contact our admin team for verification and approval.</p>
+                                <p>After approval, you will receive your Rider ID and password.</p>
+                                
+                                <div class="contact-options">
+                                    <a href="https://wa.me/923013036146" class="contact-btn whatsapp-btn" target="_blank">
+                                        <i class="fab fa-whatsapp"></i> WhatsApp
+                                    </a>
+                                    <a href="tel:03013036146" class="contact-btn call-btn">
+                                        <i class="fas fa-phone"></i> Call Us
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Your Name</label>
+                                <input type="text" class="form-input" id="riderName" 
+                                       placeholder="Enter your full name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">WhatsApp Number</label>
+                                <input type="tel" class="form-input" id="riderWhatsApp" 
+                                       placeholder="03XX-XXXXXXX" required>
+                            </div>
+                            
+                            <button class="btn btn-yellow" id="submitRiderRequest">Submit Request</button>
+                            
+                            <div class="auth-switch">
+                                Already have rider account? <a href="#" id="switchToRiderLogin">Login</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('submitRiderRequest').addEventListener('click', () => {
+                    this.submitRiderRequest();
+                });
+
+                document.getElementById('switchToRiderLogin').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showLogin('rider');
+                });
+            }
+
+            submitRiderRequest() {
+                const name = document.getElementById('riderName').value;
+                const whatsapp = document.getElementById('riderWhatsApp').value;
+
+                if (!name.trim()) {
+                    this.showMessage('Please enter your name', 'error');
+                    return;
+                }
+
+                if (!whatsapp.match(/^03\d{9}$/)) {
+                    this.showMessage('Invalid WhatsApp number', 'error');
+                    return;
+                }
+
+                // Save rider request (admin will process)
+                const riderRequest = {
+                    name,
+                    whatsapp,
+                    status: 'pending',
+                    requestDate: new Date().toISOString()
+                };
+
+                // In real app, this would go to admin
+                this.showMessage('Request submitted. Admin will contact you soon.', 'success');
+                
+                setTimeout(() => {
+                    this.showLogin('rider');
+                }, 3000);
+            }
+
+            showForgotPassword() {
+                this.updateHeader(true, false, true);
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="auth-container">
+                        <div class="auth-box">
+                            <h2 class="auth-title">Reset Password</h2>
+                            <p class="auth-subtitle">Enter your phone number to reset password</p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-input" id="resetPhone" 
+                                       placeholder="03XX-XXXXXXX" required>
+                            </div>
+                            
+                            <button class="btn" id="sendResetOTP">Send OTP</button>
+                            
+                            <div class="auth-switch">
+                                Remember password? <a href="#" id="switchToLogin">Login</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('sendResetOTP').addEventListener('click', () => {
+                    const phone = document.getElementById('resetPhone').value;
+                    if (phone.match(/^03\d{9}$/)) {
+                        this.showMessage('OTP sent to your phone', 'success');
+                        setTimeout(() => {
+                            this.showLogin('customer');
+                        }, 2000);
+                    } else {
+                        this.showMessage('Invalid phone number', 'error');
+                    }
+                });
+
+                document.getElementById('switchToLogin').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showLogin('customer');
+                });
+            }
+
+            // CUSTOMER DASHBOARD
+            showCustomerDashboard() {
+                this.updateHeader(false, true, true);
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="dashboard-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-map-marker-alt"></i> Book a Ride
+                        </h2>
+                        
+                        <div class="map-options">
+                            <div class="map-option-btn active" id="manualOption">
+                                <i class="fas fa-keyboard"></i>
+                                <div>Enter Manually</div>
+                            </div>
+                            <div class="map-option-btn" id="mapOption">
+                                <i class="fas fa-map"></i>
+                                <div>Use Map</div>
+                            </div>
+                        </div>
+                        
+                        <div id="locationInputs">
+                            <div class="form-group">
+                                <label class="form-label">Pickup Location</label>
+                                <input type="text" class="form-input" id="pickupLocation" 
+                                       placeholder="Enter your current location" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Destination</label>
+                                <input type="text" class="form-input" id="destination" 
+                                       placeholder="Where do you want to go?" required>
+                            </div>
+                        </div>
+                        
+                        <div id="mapContainer" style="display: none;">
+                            <div class="map-container">
+                                <div class="map-placeholder">
+                                    <i class="fas fa-map-marked-alt" style="font-size: 3rem; margin-bottom: 10px; color: var(--gray);"></i>
+                                    <p>Map integration would be here</p>
+                                    <a href="https://maps.app.goo.gl/CtC6aduayHkq9sgX7" target="_blank" class="btn btn-small" style="margin-top: 10px;">
+                                        Open Google Maps
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" id="searchRidersBtn">
+                            <i class="fas fa-search"></i> Search Available Riders
+                        </button>
+                    </div>
+                    
+                    ${state.offers.length > 0 ? `
+                        <div class="dashboard-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-tags"></i> Ride Offers
+                            </h2>
+                            <div id="offersList"></div>
+                        </div>
+                    ` : ''}
+                    
+                    ${state.activeRide ? `
+                        <div class="active-ride-card">
+                            <div class="ride-status">ACTIVE RIDE</div>
+                            <h3 style="margin-bottom: 1rem;">Ride in Progress</h3>
+                            <div class="ride-info">
+                                <div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">From</div>
+                                    <div style="font-weight: 600;">${state.activeRide.pickup}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">To</div>
+                                    <div style="font-weight: 600;">${state.activeRide.destination}</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-yellow" style="margin-top: 1rem;" id="trackRideBtn">
+                                <i class="fas fa-map-marked-alt"></i> Track Ride
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+
+                // Toggle between manual and map input
+                document.getElementById('manualOption').addEventListener('click', () => {
+                    document.getElementById('manualOption').classList.add('active');
+                    document.getElementById('mapOption').classList.remove('active');
+                    document.getElementById('locationInputs').style.display = 'block';
+                    document.getElementById('mapContainer').style.display = 'none';
+                });
+
+                document.getElementById('mapOption').addEventListener('click', () => {
+                    document.getElementById('mapOption').classList.add('active');
+                    document.getElementById('manualOption').classList.remove('active');
+                    document.getElementById('locationInputs').style.display = 'none';
+                    document.getElementById('mapContainer').style.display = 'block';
+                });
+
+                // Search for riders
+                document.getElementById('searchRidersBtn').addEventListener('click', () => {
+                    this.searchRiders();
+                });
+
+                if (state.offers.length > 0) {
+                    this.displayOffers();
+                }
+            }
+
+            searchRiders() {
+                const pickup = document.getElementById('pickupLocation').value;
+                const destination = document.getElementById('destination').value;
+
+                if (!pickup || !destination) {
+                    this.showMessage('Please enter both locations', 'error');
+                    return;
+                }
+
+                this.showMessage('Searching for available riders...', 'info');
+                
+                state.currentRideRequestId = 'req_' + Date.now();
+                const rideRequest = {
+                    requestId: state.currentRideRequestId,
+                    customerName: state.currentUser.name,
+                    customerPhone: state.currentUser.phone,
+                    customerId: state.currentUser.id,
+                    pickup,
+                    destination,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Send via WebSocket
+                state.socket.emit('rideRequest', rideRequest);
+
+                // Show loading state
+                const mainContent = document.getElementById('mainContent');
+                const offersSection = document.createElement('div');
+                offersSection.className = 'dashboard-section';
+                offersSection.innerHTML = `
+                    <h2 class="section-title">
+                        <i class="fas fa-tags"></i> Waiting for Offers...
+                    </h2>
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Finding available riders in your area</p>
+                    </div>
+                `;
+                mainContent.appendChild(offersSection);
+
+                // Check for existing offers
+                setTimeout(() => {
+                    this.checkForExistingOffers();
+                }, 1000);
+            }
+
+            checkForExistingOffers() {
+                const offers = DatabaseService.getActiveOffers();
+                const relevantOffers = offers.filter(o => o.requestId === state.currentRideRequestId);
+                
+                if (relevantOffers.length > 0) {
+                    state.offers = relevantOffers;
+                    this.displayOffers();
+                    this.showMessage(`${relevantOffers.length} riders are available`, 'success');
+                }
+            }
+
+            displayOffers() {
+                const offersList = document.getElementById('offersList');
+                if (!offersList) return;
+
+                offersList.innerHTML = state.offers.map(offer => `
+                    <div class="offer-card">
+                        <div class="offer-header">
+                            <div class="rider-name">${offer.riderName}</div>
+                            <div class="offer-price">PKR ${offer.fare}</div>
+                        </div>
+                        <div class="offer-details">
+                            <div class="detail-item">
+                                <i class="fas fa-clock detail-icon"></i>
+                                <span>${offer.arrivalTime} mins away</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-motorcycle detail-icon"></i>
+                                <span>${offer.vehicle}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-star detail-icon"></i>
+                                <span>${offer.rating} ★</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-car detail-icon"></i>
+                                <span>${offer.plate}</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-small accept-offer" data-offer-id="${offer.offerId}">
+                                Accept
+                            </button>
+                            <button class="btn btn-small btn-secondary view-details" data-offer-id="${offer.offerId}">
+                                Details
+                            </button>
+                            <button class="btn btn-small btn-danger cancel-offer" data-offer-id="${offer.offerId}">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Add event listeners
+                document.querySelectorAll('.accept-offer').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const offerId = e.target.dataset.offerId;
+                        this.acceptOffer(offerId);
+                    });
+                });
+
+                document.querySelectorAll('.view-details').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const offerId = e.target.dataset.offerId;
+                        this.viewRiderDetails(offerId);
+                    });
+                });
+
+                document.querySelectorAll('.cancel-offer').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const offerId = e.target.dataset.offerId;
+                        this.showCancelModal(offerId);
+                    });
+                });
+            }
+
+            acceptOffer(offerId) {
+                const offer = state.offers.find(o => o.offerId === offerId);
+                if (!offer) return;
+
+                state.activeRide = {
+                    ...offer,
+                    pickup: document.getElementById('pickupLocation').value,
+                    destination: document.getElementById('destination').value,
+                    startTime: new Date().toISOString()
+                };
+
+                // Send acceptance via WebSocket
+                state.socket.emit('offerAccepted', {
+                    requestId: state.currentRideRequestId,
+                    offerId,
+                    customer: state.currentUser,
+                    riderId: offer.riderId,
+                    fare: offer.fare,
+                    riderName: offer.riderName
+                });
+
+                // Clear offers
+                state.offers = [];
+                state.currentRideRequestId = null;
+
+                this.showCustomerDashboard();
+                this.showMessage('Ride accepted! Rider is on the way.', 'success');
+            }
+
+            viewRiderDetails(offerId) {
+                const offer = state.offers.find(o => o.offerId === offerId);
+                if (!offer) return;
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Rider Details</h3>
+                            <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div class="profile-image">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3 style="margin-top: 1rem; color: var(--primary-green);">${offer.riderName}</h3>
+                        </div>
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Vehicle</div>
+                                    <div style="font-weight: 600;">${offer.vehicle}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Plate Number</div>
+                                    <div style="font-weight: 600;">${offer.plate}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Rating</div>
+                                    <div style="font-weight: 600;">${offer.rating} ★</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Arrival Time</div>
+                                    <div style="font-weight: 600;">${offer.arrivalTime} mins</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="this.closest('.modal').remove()">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            showCancelModal(offerId) {
+                state.selectedOfferId = offerId;
+                document.getElementById('cancelRideModal').classList.add('active');
+            }
+
+            // RIDER DASHBOARD
+            showRiderDashboard() {
+                this.updateHeader(false, true, true);
+                
+                const rider = state.currentUser;
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="dashboard-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-chart-line"></i> Rider Dashboard
+                        </h2>
+                        
+                        <div class="rider-stats">
+                            <div class="stat-card">
+                                <div class="stat-number">${rider.completedRides || 0}</div>
+                                <div class="stat-label">Completed Rides</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">PKR ${rider.earnings || 0}</div>
+                                <div class="stat-label">Total Earnings</div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn ${state.isRiderOnline ? 'btn-yellow' : ''}" id="goOnlineBtn">
+                            <i class="fas fa-toggle-${state.isRiderOnline ? 'on' : 'off'}"></i> 
+                            ${state.isRiderOnline ? 'Go Offline' : 'Go Online'}
+                        </button>
+                    </div>
+                    
+                    ${state.rideRequests.length > 0 ? `
+                        <div class="dashboard-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-bell"></i> Available Ride Requests
+                            </h2>
+                            <div class="ride-requests" id="rideRequestsList"></div>
+                        </div>
+                    ` : `
+                        <div class="dashboard-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-bell"></i> Available Ride Requests
+                            </h2>
+                            <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                                <i class="fas fa-bell-slash" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p>No ride requests available at the moment</p>
+                            </div>
+                        </div>
+                    `}
+                `;
+
+                document.getElementById('goOnlineBtn').addEventListener('click', () => {
+                    this.toggleOnlineStatus();
+                });
+
+                if (state.rideRequests.length > 0) {
+                    this.displayRideRequests();
+                }
+
+                // Load existing ride requests
+                this.loadRideRequests();
+            }
+
+            loadRideRequests() {
+                const requests = DatabaseService.getActiveRideRequests();
+                state.rideRequests = requests.filter(req => {
+                    // Check if rider hasn't already offered
+                    const offers = DatabaseService.getActiveOffers();
+                    return !offers.some(offer => 
+                        offer.requestId === req.requestId && offer.riderId === state.currentUser?.id
+                    );
+                });
+                
+                if (state.rideRequests.length > 0) {
+                    this.displayRideRequests();
+                }
+            }
+
+            toggleOnlineStatus() {
+                state.isRiderOnline = !state.isRiderOnline;
+                
+                if (state.socket) {
+                    state.socket.emit('riderStatus', {
+                        riderId: state.currentUser?.id,
+                        status: state.isRiderOnline ? 'online' : 'offline'
+                    });
+                }
+
+                this.showRiderDashboard();
+                
+                if (state.isRiderOnline) {
+                    this.showMessage('You are now online and visible to customers', 'success');
+                } else {
+                    this.showMessage('You are now offline', 'warning');
+                }
+            }
+
+            displayRideRequests() {
+                const requestsList = document.getElementById('rideRequestsList');
+                if (!requestsList) return;
+
+                requestsList.innerHTML = state.rideRequests.map(request => `
+                    <div class="request-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="color: var(--primary-green);">${request.customerName}</h3>
+                            <span style="font-size: 0.8rem; color: var(--gray);">
+                                ${new Date(request.timestamp).toLocaleTimeString()}
+                            </span>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                <i class="fas fa-map-marker-alt" style="color: var(--primary-green); margin-right: 8px;"></i>
+                                <span>${request.pickup}</span>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <i class="fas fa-flag" style="color: var(--primary-green); margin-right: 8px;"></i>
+                                <span>${request.destination}</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-small send-offer-btn" data-request-id="${request.requestId}">
+                                Send Offer
+                            </button>
+                            <button class="btn btn-small btn-secondary" onclick="app.viewCustomerDetails('${request.customerPhone}')">
+                                Details
+                            </button>
+                            <button class="btn btn-small btn-danger cancel-request-btn" data-request-id="${request.requestId}">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Add event listeners
+                document.querySelectorAll('.send-offer-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const requestId = e.target.dataset.requestId;
+                        this.showSendOfferModal(requestId);
+                    });
+                });
+
+                document.querySelectorAll('.cancel-request-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const requestId = e.target.dataset.requestId;
+                        this.showCancelModalRider(requestId);
+                    });
+                });
+            }
+
+            showSendOfferModal(requestId) {
+                state.selectedRequest = state.rideRequests.find(r => r.requestId === requestId);
+                document.getElementById('sendOfferModal').classList.add('active');
+            }
+
+            showCancelModalRider(requestId) {
+                state.selectedRequest = state.rideRequests.find(r => r.requestId === requestId);
+                document.getElementById('cancelRideModalRider').classList.add('active');
+            }
+
+            // PROFILE FUNCTIONS
+            showCustomerProfile() {
+                this.updateHeader(true, false, true);
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="dashboard-section">
+                        <div class="profile-image-container">
+                            <div class="profile-image">
+                                ${state.currentUser.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <h3>${state.currentUser.name}</h3>
+                                <p style="color: var(--gray);">Customer</p>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <div class="info-item">
+                                <span>Phone Number</span>
+                                <span style="font-weight: 600;">${state.currentUser.phone}</span>
+                            </div>
+                            ${state.currentUser.email ? `
+                                <div class="info-item">
+                                    <span>Email</span>
+                                    <span style="font-weight: 600;">${state.currentUser.email}</span>
+                                </div>
+                            ` : ''}
+                            <div class="info-item">
+                                <span>Total Rides</span>
+                                <span style="font-weight: 600;">${state.currentUser.totalRides || 0}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Member Since</span>
+                                <span style="font-weight: 600;">${new Date(state.currentUser.registrationDate).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-secondary" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                `;
+
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    this.logout();
+                });
+            }
+
+            showRiderProfile() {
+                this.updateHeader(true, false, true);
+                
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <div class="dashboard-section">
+                        <div class="profile-image-container">
+                            <div class="profile-image">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <h3>${state.currentUser.name}</h3>
+                                <p style="color: var(--gray);">Professional Rider</p>
+                                <div style="background: var(--yellow); color: var(--black); padding: 4px 12px; 
+                                        border-radius: 20px; display: inline-block; font-weight: 600; margin-top: 5px;">
+                                    ID: ${state.currentUser.id}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <div class="info-item">
+                                <span>Rider ID</span>
+                                <span style="font-weight: 600;">${state.currentUser.id}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Vehicle Type</span>
+                                <span style="font-weight: 600;">${state.currentUser.vehicle || 'Motorcycle'}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Plate Number</span>
+                                <span style="font-weight: 600;">${state.currentUser.plate || 'AJK-XXXX'}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Completed Rides</span>
+                                <span style="font-weight: 600;">${state.currentUser.completedRides || 0}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Total Earnings</span>
+                                <span style="font-weight: 600;">PKR ${state.currentUser.earnings || 0}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Rating</span>
+                                <span style="font-weight: 600;">${state.currentUser.rating || '4.5'} ★</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-secondary" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                `;
+
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    this.logout();
+                });
+            }
+
+            logout() {
+                localStorage.removeItem(`${state.userType}Token`);
+                localStorage.removeItem(`${state.userType}Data`);
+                state.currentUser = null;
+                state.userType = null;
+                state.isRiderOnline = false;
+                this.showAppSelection();
+            }
+
+            // COMPLAINT FUNCTIONS
+            showComplaintModal() {
+                document.getElementById('complaintModal').classList.add('active');
+            }
+
+            submitComplaint() {
+                const contact = document.getElementById('complainantContact').value;
+                const riderName = document.getElementById('complaintRiderName').value;
+                const details = document.getElementById('complaintDetails').value;
+                const rating = document.querySelectorAll('.rating-star.fas').length;
+
+                if (!contact || !riderName || !details) {
+                    this.showMessage('Please fill all required fields', 'error');
+                    return;
+                }
+
+                const complaint = {
+                    id: 'complaint_' + Date.now(),
+                    contact,
+                    riderName,
+                    details,
+                    rating,
+                    date: new Date().toISOString(),
+                    status: 'pending',
+                    submittedBy: state.currentUser?.name || 'Anonymous'
+                };
+
+                // Send via WebSocket
+                state.socket.emit('newComplaint', complaint);
+
+                // Save locally
+                const complaints = DatabaseService.getComplaints();
+                complaints.push(complaint);
+                DatabaseService.saveComplaints(complaints);
+
+                this.hideModal('complaintModal');
+                this.showMessage('Complaint submitted successfully', 'success');
+
+                // Reset form
+                document.getElementById('complainantContact').value = '';
+                document.getElementById('complaintRiderName').value = '';
+                document.getElementById('complaintDetails').value = '';
+                document.querySelectorAll('.rating-star').forEach(star => {
+                    star.classList.remove('fas', 'active');
+                    star.classList.add('far');
+                });
+            }
+
+            // SOCKET FUNCTIONS
+            setupWebSocket() {
+                state.socket = WebSocketService.connect();
+                
+                // Listen for ride requests (for riders)
+                state.socket.on('onRideRequest', (request) => {
+                    if (state.userType === 'rider' && state.isRiderOnline) {
+                        // Check if request already exists
+                        if (!state.rideRequests.some(r => r.requestId === request.requestId)) {
+                            state.rideRequests.push(request);
+                            this.showRiderDashboard();
+                            this.showMessage('New ride request available!', 'info');
+                        }
+                    }
+                });
+
+                // Listen for offers (for customers)
+                state.socket.on('onNewOffer', (offer) => {
+                    if (state.userType === 'customer' && state.currentRideRequestId === offer.requestId) {
+                        if (!state.offers.some(o => o.offerId === offer.offerId)) {
+                            state.offers.push(offer);
+                            this.displayOffers();
+                            this.showMessage(`New offer from ${offer.riderName}`, 'info');
+                        }
+                    }
+                });
+
+                // Listen for offer acceptance (for riders)
+                state.socket.on('onOfferAccepted', (data) => {
+                    if (state.userType === 'rider' && data.riderId === state.currentUser?.id) {
+                        // Remove the request
+                        state.rideRequests = state.rideRequests.filter(r => r.requestId !== data.requestId);
+                        this.showRiderDashboard();
+                        this.showMessage('Your offer has been accepted!', 'success');
+                    }
+                });
+
+                // Listen for ride cancellations
+                state.socket.on('onRideCancelled', (cancelledRide) => {
+                    if (cancelledRide.customerId === state.currentUser?.id || 
+                        cancelledRide.riderId === state.currentUser?.id) {
+                        this.showMessage('Ride has been cancelled', 'warning');
+                        if (state.userType === 'customer') {
+                            this.showCustomerDashboard();
+                        } else {
+                            this.showRiderDashboard();
+                        }
+                    }
+                });
+            }
+
+            // UTILITY FUNCTIONS
+            showMessage(message, type = 'info') {
+                const mainContent = document.getElementById('mainContent');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `status-message status-${type}`;
+                
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    info: 'fas fa-info-circle'
+                };
+                
+                messageDiv.innerHTML = `
+                    <i class="${icons[type]} status-icon"></i>
+                    <span>${message}</span>
+                `;
+                
+                if (mainContent.firstChild) {
+                    mainContent.insertBefore(messageDiv, mainContent.firstChild);
+                } else {
+                    mainContent.appendChild(messageDiv);
+                }
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.style.opacity = '0';
+                        messageDiv.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            if (messageDiv.parentNode) {
+                                messageDiv.parentNode.removeChild(messageDiv);
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            }
+
+            hideModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            }
+
+            setupEventListeners() {
+                // Complaint button
+                document.getElementById('complaintBtn').addEventListener('click', () => {
+                    this.showComplaintModal();
+                });
+
+                // Modal close buttons
+                document.getElementById('closeComplaintModal').addEventListener('click', () => {
+                    this.hideModal('complaintModal');
+                });
+
+                document.getElementById('closeCancelModal').addEventListener('click', () => {
+                    this.hideModal('cancelRideModal');
+                });
+
+                document.getElementById('closeCancelModalRider').addEventListener('click', () => {
+                    this.hideModal('cancelRideModalRider');
+                });
+
+                document.getElementById('closeOfferModal').addEventListener('click', () => {
+                    this.hideModal('sendOfferModal');
+                });
+
+                // Submit complaint
+                document.getElementById('submitComplaint').addEventListener('click', () => {
+                    this.submitComplaint();
+                });
+
+                // Cancel ride
+                document.getElementById('confirmCancelRide').addEventListener('click', () => {
+                    this.cancelRide();
+                });
+
+                // Cancel ride request (rider)
+                document.getElementById('confirmCancelRideRider').addEventListener('click', () => {
+                    this.cancelRideRequest();
+                });
+
+                // Submit offer
+                document.getElementById('submitOffer').addEventListener('click', () => {
+                    this.sendOffer();
+                });
+
+                // Rating stars
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('rating-star')) {
+                        const rating = parseInt(e.target.dataset.rating);
+                        const stars = e.target.parentElement.querySelectorAll('.rating-star');
+                        stars.forEach((s, index) => {
+                            if (index < rating) {
+                                s.classList.add('fas', 'active');
+                                s.classList.remove('far');
+                            } else {
+                                s.classList.add('far');
+                                s.classList.remove('fas', 'active');
+                            }
+                        });
+                    }
+                });
+            }
+
+            cancelRide() {
+                const reason = document.getElementById('cancelReason').value;
+                const details = document.getElementById('cancelDetails').value;
+
+                if (!reason) {
+                    this.showMessage('Please select a reason', 'error');
+                    return;
+                }
+
+                const cancelledRide = {
+                    rideId: state.selectedOfferId,
+                    reason,
+                    details,
+                    cancelledBy: 'customer',
+                    customerName: state.currentUser?.name,
+                    customerId: state.currentUser?.id,
+                    date: new Date().toISOString()
+                };
+
+                // Send via WebSocket
+                state.socket.emit('rideCancelled', cancelledRide);
+
+                // Save locally
+                const cancelledRides = DatabaseService.getCancelledRides();
+                cancelledRides.push(cancelledRide);
+                DatabaseService.saveCancelledRides(cancelledRides);
+
+                this.hideModal('cancelRideModal');
+                state.offers = state.offers.filter(o => o.offerId !== state.selectedOfferId);
+                state.selectedOfferId = null;
+                this.showCustomerDashboard();
+                this.showMessage('Ride cancelled successfully', 'success');
+            }
+
+            cancelRideRequest() {
+                const reason = document.getElementById('cancelReasonRider').value;
+                const details = document.getElementById('cancelDetailsRider').value;
+
+                if (!reason) {
+                    this.showMessage('Please select a reason', 'error');
+                    return;
+                }
+
+                const cancelledRequest = {
+                    requestId: state.selectedRequest.requestId,
+                    reason,
+                    details,
+                    cancelledBy: 'rider',
+                    riderName: state.currentUser?.name,
+                    riderId: state.currentUser?.id,
+                    date: new Date().toISOString()
+                };
+
+                // Remove from requests
+                state.rideRequests = state.rideRequests.filter(r => r.requestId !== state.selectedRequest.requestId);
+                
+                this.hideModal('cancelRideModalRider');
+                this.showRiderDashboard();
+                this.showMessage('Request cancelled successfully', 'success');
+            }
+
+            sendOffer() {
+                const fare = document.getElementById('offerFare').value;
+                const arrivalTime = document.getElementById('offerArrivalTime').value;
+
+                if (!fare || !arrivalTime) {
+                    this.showMessage('Please fill all fields', 'error');
+                    return;
+                }
+
+                const offerData = {
+                    requestId: state.selectedRequest.requestId,
+                    riderId: state.currentUser.id,
+                    riderName: state.currentUser.name,
+                    fare: parseInt(fare),
+                    arrivalTime: parseInt(arrivalTime),
+                    vehicle: state.currentUser.vehicle || 'Motorcycle',
+                    plate: state.currentUser.plate || 'AJK-XXXX',
+                    rating: state.currentUser.rating || 4.5,
+                    offerId: 'offer_' + Date.now()
+                };
+
+                // Send via WebSocket
+                state.socket.emit('sendOffer', offerData);
+
+                this.hideModal('sendOfferModal');
+                this.showMessage('Offer sent successfully', 'success');
+                
+                // Remove from rider's view
+                state.rideRequests = state.rideRequests.filter(r => r.requestId !== state.selectedRequest.requestId);
+                this.showRiderDashboard();
+            }
+
+            viewCustomerDetails(phone) {
+                const customers = DatabaseService.getCustomers();
+                const customer = customers.find(c => c.phone === phone);
+                
+                if (!customer) {
+                    this.showMessage('Customer not found', 'error');
+                    return;
+                }
+
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Customer Details</h3>
+                            <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div class="profile-image">
+                                ${customer.name.charAt(0).toUpperCase()}
+                            </div>
+                            <h3 style="margin-top: 1rem; color: var(--primary-green);">${customer.name}</h3>
+                        </div>
+                        <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Phone</div>
+                                    <div style="font-weight: 600;">${customer.phone}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Total Rides</div>
+                                    <div style="font-weight: 600;">${customer.totalRides || 0}</div>
+                                </div>
+                                ${customer.email ? `
+                                    <div>
+                                        <div style="font-size: 0.9rem; color: var(--gray);">Email</div>
+                                        <div style="font-weight: 600;">${customer.email}</div>
+                                    </div>
+                                ` : ''}
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Member Since</div>
+                                    <div style="font-weight: 600;">${new Date(customer.registrationDate).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="this.closest('.modal').remove()">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+        }
+
+        // Initialize the app
+        const app = new CustomerRiderApp();
+        window.app = app;
+    </script>
+</body>
+</html>
