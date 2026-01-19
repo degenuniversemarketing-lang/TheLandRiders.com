@@ -523,6 +523,41 @@
             }
         }
     </style>
+    <!-- Add this RIGHT BEFORE </head> -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+/* Add notification styles */
+.admin-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-left: 4px solid #4CAF50;
+    z-index: 10000;
+    max-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.notification-new-complaint {
+    border-left-color: #f44336;
+}
+
+.notification-new-ride {
+    border-left-color: #2196F3;
+}
+
+.notification-rider-online {
+    border-left-color: #4CAF50;
+}
+</style>
 </head>
 <body>
     <div class="container">
@@ -2899,5 +2934,429 @@ function addNotification(message) {
 // Initialize admin panel
 window.onload = connectAsAdmin;
     </script>
+    <!-- Add this RIGHT BEFORE </body> (after your existing script) -->
+<script>
+// ==================== BACKEND CONFIGURATION ====================
+// REPLACE THIS WITH YOUR RAILWAY BACKEND URL
+const BACKEND_URL = 'https://land-riders-backend.up.railway.app';
+let socket = null;
+let currentAdmin = null;
+
+// ==================== INITIALIZE SOCKET ====================
+function initializeAdminSocket() {
+    console.log('Connecting to backend as admin:', BACKEND_URL);
+    socket = io(BACKEND_URL);
+    
+    // Connection events
+    socket.on('connect', () => {
+        console.log('✅ Admin connected to backend');
+        updateAdminConnectionStatus('connected');
+        
+        // Auto-login if admin data saved
+        const savedAdmin = localStorage.getItem('adminData');
+        if (savedAdmin) {
+            const adminData = JSON.parse(savedAdmin);
+            socket.emit('admin_login', {
+                username: adminData.username || 'admin',
+                password: localStorage.getItem('adminPassword') || 'admin123'
+            });
+        }
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('❌ Admin disconnected from backend');
+        updateAdminConnectionStatus('disconnected');
+    });
+    
+    // ==================== ADMIN EVENTS ====================
+    socket.on('admin_login_success', handleAdminLoginSuccess);
+    socket.on('admin_login_failed', handleAdminLoginFailed);
+    
+    socket.on('rider_created_success', handleRiderCreatedSuccess);
+    socket.on('admin_error', handleAdminError);
+    
+    // Real-time updates
+    socket.on('new_rider_added', handleNewRiderAdded);
+    socket.on('rider_status_changed', handleRiderStatusChanged);
+    socket.on('rider_offline', handleRiderOffline);
+    
+    socket.on('new_customer_registered', handleNewCustomerRegistered);
+    socket.on('customer_logged_in', handleCustomerLoggedIn);
+    
+    socket.on('new_ride_created', handleNewRideCreated);
+    socket.on('ride_accepted_by_rider', handleRideAcceptedByRider);
+    socket.on('ride_completed', handleRideCompletedAdmin);
+    
+    socket.on('new_complaint_received', handleNewComplaintReceived);
+    socket.on('complaint_status_changed', handleComplaintStatusChanged);
+}
+
+// ==================== ADMIN FUNCTIONS ====================
+function adminLogin(username, password) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    socket.emit('admin_login', {
+        username: username,
+        password: password
+    });
+    
+    // Save password for auto-login
+    localStorage.setItem('adminPassword', password);
+    
+    return true;
+}
+
+function createRider(name, phone, vehicle, plateNumber, whatsapp, password) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    if (!currentAdmin) {
+        alert('Please login as admin first');
+        return false;
+    }
+    
+    // Validate vehicle type
+    if (!['Bike', 'Car'].includes(vehicle)) {
+        alert('Vehicle must be Bike or Car');
+        return false;
+    }
+    
+    socket.emit('admin_create_rider', {
+        name: name,
+        phone: phone,
+        vehicle: vehicle,
+        plateNumber: plateNumber,
+        whatsapp: whatsapp,
+        password: password
+    });
+    
+    return true;
+}
+
+function updateComplaintStatus(complaintId, status, response) {
+    if (!socket || !socket.connected) {
+        alert('Please wait for connection...');
+        return false;
+    }
+    
+    if (!currentAdmin) {
+        alert('Please login as admin first');
+        return false;
+    }
+    
+    socket.emit('update_complaint', {
+        complaintId: complaintId,
+        status: status,
+        response: response
+    });
+}
+
+// ==================== EVENT HANDLERS ====================
+function handleAdminLoginSuccess(data) {
+    console.log('Admin login successful:', data);
+    
+    currentAdmin = data.admin;
+    localStorage.setItem('adminData', JSON.stringify(data.admin));
+    
+    // Show admin dashboard
+    showAdminDashboard(data);
+    
+    showAdminNotification('Admin login successful!', 'success');
+}
+
+function handleAdminLoginFailed(data) {
+    console.error('Admin login failed:', data);
+    showAdminNotification('Admin login failed: ' + data.message, 'error');
+    
+    // Clear saved data
+    localStorage.removeItem('adminData');
+    localStorage.removeItem('adminPassword');
+}
+
+function handleRiderCreatedSuccess(data) {
+    console.log('Rider created successfully:', data);
+    
+    // Show success message with credentials
+    const rider = data.rider;
+    const credentials = rider.loginCredentials;
+    
+    showAdminNotification(`Rider ${rider.name} created successfully!`, 'success');
+    
+    // Show credentials to admin
+    alert(`✅ Rider Created Successfully!\n\nRider Details:\nName: ${rider.name}\nPhone: ${rider.phone}\nVehicle: ${rider.vehicle}\n\nLogin Credentials:\nRider ID: ${credentials.riderId}\nPassword: ${credentials.password}\n\nShare these details with the rider.`);
+    
+    // Clear form
+    document.getElementById('riderName').value = '';
+    document.getElementById('riderPhone').value = '';
+    document.getElementById('riderPlate').value = '';
+    document.getElementById('riderWhatsapp').value = '';
+    document.getElementById('riderPassword').value = 'landrider123';
+    
+    // Refresh riders list
+    loadRidersList();
+}
+
+function handleAdminError(data) {
+    console.error('Admin error:', data);
+    showAdminNotification('Error: ' + data.message, 'error');
+}
+
+function handleNewRiderAdded(rider) {
+    console.log('New rider added (real-time):', rider);
+    showAdminNotification(`New rider added: ${rider.name}`, 'rider-online');
+    addRiderToList(rider);
+    updateStats();
+}
+
+function handleRiderStatusChanged(data) {
+    console.log('Rider status changed:', data);
+    updateRiderStatusInList(data.riderId, data.status);
+    updateStats();
+}
+
+function handleRiderOffline(data) {
+    console.log('Rider went offline:', data);
+    updateRiderStatusInList(data.riderId, 'offline');
+    updateStats();
+}
+
+function handleNewCustomerRegistered(customer) {
+    console.log('New customer registered:', customer);
+    showAdminNotification(`New customer registered: ${customer.name}`, 'info');
+    updateStats();
+}
+
+function handleCustomerLoggedIn(data) {
+    console.log('Customer logged in:', data);
+    updateStats();
+}
+
+function handleNewRideCreated(ride) {
+    console.log('New ride created:', ride);
+    showAdminNotification(`New ride request from ${ride.customerName}`, 'new-ride');
+    addRideToList(ride);
+    updateStats();
+}
+
+function handleRideAcceptedByRider(data) {
+    console.log('Ride accepted by rider:', data);
+    showAdminNotification(`Ride accepted by ${data.riderName}`, 'success');
+    updateRideStatusInList(data.rideId, 'active');
+    updateStats();
+}
+
+function handleRideCompletedAdmin(data) {
+    console.log('Ride completed:', data);
+    showAdminNotification(`Ride completed: $${data.fare}`, 'success');
+    updateRideStatusInList(data.rideId, 'completed');
+    updateStats();
+}
+
+function handleNewComplaintReceived(complaint) {
+    console.log('New complaint received:', complaint);
+    
+    // Play notification sound
+    playNotificationSound();
+    
+    // Show notification
+    showAdminNotification(`New complaint from ${complaint.userName}`, 'new-complaint');
+    
+    // Add to complaints list
+    addComplaintToList(complaint);
+    
+    // Update badge count
+    updateComplaintBadge();
+    
+    updateStats();
+}
+
+function handleComplaintStatusChanged(complaint) {
+    console.log('Complaint status changed:', complaint);
+    updateComplaintStatusInList(complaint.complaintId, complaint.status);
+    updateStats();
+}
+
+// ==================== HELPER FUNCTIONS ====================
+function updateAdminConnectionStatus(status) {
+    const statusElement = document.getElementById('adminConnectionStatus');
+    if (statusElement) {
+        statusElement.textContent = status === 'connected' ? '🟢 Connected' : '🔴 Disconnected';
+        statusElement.style.color = status === 'connected' ? '#4CAF50' : '#f44336';
+    }
+}
+
+function showAdminNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `admin-notification notification-${type}`;
+    notification.innerHTML = `
+        <div style="display: flex; align-items: start; gap: 10px;">
+            <i class="fas fa-${getNotificationIcon(type)}" style="color: ${getNotificationColor(type)}; font-size: 1.2rem;"></i>
+            <div>
+                <strong>${getNotificationTitle(type)}</strong>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem;">${message}</p>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+function getNotificationIcon(type) {
+    switch(type) {
+        case 'success': return 'check-circle';
+        case 'error': return 'exclamation-circle';
+        case 'new-complaint': return 'exclamation-triangle';
+        case 'new-ride': return 'car';
+        case 'rider-online': return 'motorcycle';
+        default: return 'info-circle';
+    }
+}
+
+function getNotificationColor(type) {
+    switch(type) {
+        case 'success': return '#4CAF50';
+        case 'error': return '#f44336';
+        case 'new-complaint': return '#f44336';
+        case 'new-ride': return '#2196F3';
+        case 'rider-online': return '#4CAF50';
+        default: return '#757575';
+    }
+}
+
+function getNotificationTitle(type) {
+    switch(type) {
+        case 'success': return 'Success';
+        case 'error': return 'Error';
+        case 'new-complaint': return 'New Complaint';
+        case 'new-ride': return 'New Ride';
+        case 'rider-online': return 'Rider Online';
+        default: return 'Notification';
+    }
+}
+
+function playNotificationSound() {
+    try {
+        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+        audio.volume = 0.3;
+        audio.play();
+    } catch (error) {
+        console.log('Sound play failed:', error);
+    }
+}
+
+function showAdminDashboard(data) {
+    // Hide login screen, show dashboard
+    document.getElementById('authContainer').style.display = 'none';
+    document.getElementById('adminDashboard').style.display = 'block';
+    
+    // Update stats
+    if (data.stats) {
+        updateDashboardStats(data.stats);
+    }
+    
+    // Load data
+    if (data.riders) {
+        loadRiders(data.riders);
+    }
+    
+    if (data.complaints) {
+        loadComplaints(data.complaints);
+    }
+}
+
+function updateDashboardStats(stats) {
+    // Update your dashboard cards
+    const elements = {
+        'totalRiders': stats.totalRiders,
+        'onlineRiders': stats.onlineRiders,
+        'totalCustomers': stats.totalCustomers,
+        'onlineCustomers': stats.onlineCustomers,
+        'pendingRides': stats.pendingRides,
+        'activeRides': stats.activeRides,
+        'completedRides': stats.completedRides,
+        'totalComplaints': stats.totalComplaints,
+        'unreadComplaints': stats.unreadComplaints,
+        'totalEarnings': stats.totalEarnings
+    };
+    
+    for (const [id, value] of Object.entries(elements)) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+}
+
+function loadRiders(riders) {
+    const container = document.getElementById('ridersListContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    riders.forEach(rider => {
+        const riderCard = createRiderCard(rider);
+        container.appendChild(riderCard);
+    });
+}
+
+function loadComplaints(complaints) {
+    const container = document.getElementById('complaintsListContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    complaints.forEach(complaint => {
+        const complaintCard = createComplaintCard(complaint);
+        container.appendChild(complaintCard);
+    });
+}
+
+function updateStats() {
+    // Fetch updated stats from API
+    fetch(BACKEND_URL + '/api/admin/stats')
+        .then(response => response.json())
+        .then(stats => {
+            updateDashboardStats(stats);
+        })
+        .catch(error => {
+            console.error('Error fetching stats:', error);
+        });
+}
+
+// ==================== INITIALIZE ON PAGE LOAD ====================
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAdminSocket();
+    
+    // Check if admin is already logged in
+    const adminData = localStorage.getItem('adminData');
+    if (adminData) {
+        currentAdmin = JSON.parse(adminData);
+        // Auto-login
+        socket.emit('admin_login', {
+            username: currentAdmin.username || 'admin',
+            password: localStorage.getItem('adminPassword') || 'admin123'
+        });
+    }
+});
+
+// ==================== MAKE FUNCTIONS GLOBAL ====================
+window.adminLogin = adminLogin;
+window.createRider = createRider;
+window.updateComplaintStatus = updateComplaintStatus;
+</script>
 </body>
 </html>
