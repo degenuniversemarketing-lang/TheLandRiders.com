@@ -3044,11 +3044,12 @@
         // Initialize the app
         const app = new CustomerRiderApp();
         window.app = app;
+        
     <!-- Socket.io client -->
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
 <script>
-  const API_URL = "bykea-backend-production.up.railway.app";
+  const API_URL = "https://bykea-backend-production.up.railway.app";
 
   // connect to backend
   const socket = io(API_URL);
