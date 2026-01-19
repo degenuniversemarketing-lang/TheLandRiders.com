@@ -3045,5 +3045,39 @@
         const app = new CustomerRiderApp();
         window.app = app;
     </script>
+    <!-- Socket.io client -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+  const API_URL = "https://bykea-backend-production.up.railway.app";
+
+  // connect to backend
+  const socket = io(API_URL);
+
+  socket.on("connect", () => {
+    console.log("Connected to backend");
+  });
+
+  // when a new ride is created
+  socket.on("newRide", (ride) => {
+    alert("New ride request received!");
+  });
+
+  // customer creates ride
+  function createRide() {
+    fetch(`${API_URL}/ride/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rideId: Date.now(),
+        pickup: "Test location"
+      })
+    })
+    .then(res => res.json())
+    .then(() => alert("Ride requested"));
+  }
+</script>
+
+<button onclick="createRide()">Request Ride</button>
 </body>
 </html>
