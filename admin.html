@@ -2814,5 +2814,90 @@
         const adminApp = new AdminApp();
         window.adminApp = adminApp;
     </script>
+    <script>
+const BACKEND_URL = 'https://lannd-riders-backend.up.railway.app';
+let socket;
+
+function connectAsAdmin() {
+    socket = io(BACKEND_URL);
+    
+    socket.emit('admin_connect');
+    
+    socket.on('connect', () => {
+        console.log('Admin connected');
+        document.getElementById('adminStatus').innerText = '🟢 Admin Connected';
+    });
+    
+    // Receive system status
+    socket.on('admin_status', (data) => {
+        updateDashboard(data);
+    });
+    
+    // Live updates
+    socket.on('system_update', (data) => {
+        updateDashboard(data);
+    });
+    
+    socket.on('riders_list', (riders) => {
+        updateRidersTable(riders);
+    });
+    
+    socket.on('customers_list', (customers) => {
+        updateCustomersTable(customers);
+    });
+    
+    socket.on('all_rides', (rides) => {
+        updateRidesTable(rides);
+    });
+    
+    // Real-time events
+    socket.on('rider_joined', (rider) => {
+        alert(`🏍️ New rider online: ${rider.name}`);
+        addNotification(`Rider ${rider.name} joined`);
+    });
+    
+    socket.on('customer_joined', (customer) => {
+        addNotification(`Customer ${customer.name} joined`);
+    });
+    
+    socket.on('new_ride_request', (ride) => {
+        alert(`🚖 New ride request from ${ride.customerName}`);
+        addNotification(`New ride: ${ride.pickup} → ${ride.destination}`);
+    });
+    
+    socket.on('ride_accepted_admin', (ride) => {
+        addNotification(`Ride accepted by ${ride.riderName}`);
+    });
+    
+    socket.on('ride_completed_admin', (ride) => {
+        addNotification(`Ride completed: ${ride.actualFare}`);
+    });
+}
+
+function updateDashboard(data) {
+    document.getElementById('totalRiders').innerText = data.totalRiders || 0;
+    document.getElementById('availableRiders').innerText = data.availableRiders || 0;
+    document.getElementById('totalCustomers').innerText = data.totalCustomers || 0;
+    document.getElementById('pendingRides').innerText = data.pendingRides || 0;
+    document.getElementById('activeRides').innerText = data.activeRides || 0;
+    document.getElementById('completedRides').innerText = data.completedRides || 0;
+}
+
+function addNotification(message) {
+    const notifications = document.getElementById('notifications');
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `<span>${new Date().toLocaleTimeString()}</span> ${message}`;
+    notifications.prepend(notification);
+    
+    // Keep only last 10 notifications
+    while (notifications.children.length > 10) {
+        notifications.removeChild(notifications.lastChild);
+    }
+}
+
+// Initialize admin panel
+window.onload = connectAsAdmin;
+    </script>
 </body>
 </html>
