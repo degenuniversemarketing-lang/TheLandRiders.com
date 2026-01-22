@@ -2908,216 +2908,142 @@ window.onload = connectAsAdmin;
     <!-- Add this RIGHT BEFORE </body> (after your existing script) -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-// ==================== BACKEND CONFIGURATION ====================
-const BACKEND_URL = 'https://bykea-testing-production.up.railway.app';
-let socket = null;
-let currentAdmin = null;
+    const socket = io('http://localhost:3000');
+    let allRides = [];
+    let allRiders = [];
 
-// ==================== INITIALIZE CONNECTION ====================
-function initializeAdminSocket() {
-    console.log('🔗 Connecting to backend:', BACKEND_URL);
-    
-    socket = io(BACKEND_URL, {
-        transports: ['websocket', 'polling'],
-        reconnection: true
-    });
-    
-    // Connection events
     socket.on('connect', () => {
-        console.log('✅✅✅ ADMIN CONNECTED to backend!');
-        updateAdminStatus('🟢 Connected');
-        
-        // Auto-login if saved
-        const savedAdmin = localStorage.getItem('adminData');
-        if (savedAdmin) {
-            const adminData = JSON.parse(savedAdmin);
-            adminLogin(adminData.username, localStorage.getItem('adminPassword'));
+        console.log('Admin connected');
+        socket.emit('admin-connect');
+        socket.emit('get-active-rides', 'admin');
+    });
+
+    // Receive all rides
+    socket.on('all-rides', (rides) => {
+        allRides = rides;
+        updateAdminDashboard();
+        updateRidesTable();
+    });
+
+    // New ride notification
+    socket.on('new-ride', (ride) => {
+        allRides.push(ride);
+        updateAdminDashboard();
+        updateRidesTable();
+        showNotification(`New ride request from ${ride.customerName}`);
+    });
+
+    // Ride updated
+    socket.on('ride-updated', (ride) => {
+        const index = allRides.findIndex(r => r.id === ride.id);
+        if (index !== -1) {
+            allRides[index] = ride;
+        } else {
+            allRides.push(ride);
         }
+        updateAdminDashboard();
+        updateRidesTable();
     });
-    
-    socket.on('disconnect', () => {
-        console.log('❌ Admin disconnected');
-        updateAdminStatus('🔴 Disconnected');
+
+    // Rider status changed
+    socket.on('rider-status-changed', (data) => {
+        const index = allRiders.findIndex(r => r.riderId === data.riderId);
+        if (index !== -1) {
+            allRiders[index] = data;
+        } else {
+            allRiders.push(data);
+        }
+        updateRidersTable();
     });
-    
-    socket.on('connect_error', (error) => {
-        console.error('❌ Connection error:', error.message);
-        updateAdminStatus('🔴 Connection Failed');
-    });
-    
-    // ==================== ADMIN EVENTS ====================
-    socket.on('admin_login_success', handleAdminLoginSuccess);
-    socket.on('admin_login_failed', handleAdminLoginFailed);
-    socket.on('rider_created_success', handleRiderCreatedSuccess);
-    socket.on('admin_error', handleAdminError);
-    socket.on('new_ride_request', handleNewRideRequest);
-    socket.on('ride_accepted_by_rider', handleRideAcceptedByRider);
-    socket.on('ride_completed', handleRideCompletedAdmin);
-    socket.on('new_complaint_received', handleNewComplaint);
-}
 
-// ==================== ADMIN FUNCTIONS ====================
-function adminLogin(username, password) {
-    if (!socket || !socket.connected) {
-        alert('Please wait for connection...');
-        return false;
+    function updateAdminDashboard() {
+        const totalRides = allRides.length;
+        const pendingRides = allRides.filter(r => r.status === 'pending').length;
+        const activeRides = allRides.filter(r => r.status === 'accepted' || r.status === 'picked_up').length;
+        const completedRides = allRides.filter(r => r.status === 'completed').length;
+
+        document.getElementById('total-rides').textContent = totalRides;
+        document.getElementById('pending-rides').textContent = pendingRides;
+        document.getElementById('active-rides').textContent = activeRides;
+        document.getElementById('completed-rides').textContent = completedRides;
     }
-    
-    socket.emit('admin_login', {
-        username: username,
-        password: password
-    });
-    
-    localStorage.setItem('adminPassword', password);
-    return true;
-}
 
-function createRider(name, phone, vehicle, plateNumber, whatsapp, password) {
-    if (!socket || !socket.connected) {
-        alert('Please wait for connection...');
-        return false;
-    }
-    
-    if (!currentAdmin) {
-        alert('Please login as admin first');
-        return false;
-    }
-    
-    socket.emit('admin_create_rider', {
-        name: name,
-        phone: phone,
-        vehicle: vehicle,
-        plateNumber: plateNumber,
-        whatsapp: whatsapp,
-        password: password
-    });
-    
-    return true;
-}
+    function updateRidesTable() {
+        const tbody = document.querySelector('#rides-table tbody');
+        tbody.innerHTML = '';
 
-// ==================== EVENT HANDLERS ====================
-function handleAdminLoginSuccess(data) {
-    console.log('Admin login success:', data);
-    
-    currentAdmin = data.admin;
-    localStorage.setItem('adminData', JSON.stringify(data.admin));
-    
-    showNotification('Admin login successful!', 'success');
-    showAdminDashboard(data);
-}
-
-function handleAdminLoginFailed(data) {
-    console.error('Admin login failed:', data);
-    showNotification('Admin login failed: ' + data.message, 'error');
-    
-    localStorage.removeItem('adminData');
-    localStorage.removeItem('adminPassword');
-}
-
-function handleRiderCreatedSuccess(data) {
-    console.log('Rider created success:', data);
-    
-    const rider = data.rider;
-    showNotification('Rider ' + rider.name + ' created successfully!', 'success');
-    
-    // Show credentials
-    alert(`✅ RIDER CREATED SUCCESSFULLY!\n\nRider Details:\nName: ${rider.name}\nPhone: ${rider.phone}\nVehicle: ${rider.vehicle}\n\nLogin Credentials:\nRider ID: ${rider.riderId}\nPassword: ${rider.password}\n\nShare these with the rider.`);
-    
-    // Clear form
-    document.getElementById('riderName').value = '';
-    document.getElementById('riderPhone').value = '';
-    document.getElementById('riderPlate').value = '';
-    document.getElementById('riderWhatsapp').value = '';
-    document.getElementById('riderPassword').value = 'landrider123';
-}
-
-function handleAdminError(data) {
-    console.error('Admin error:', data);
-    showNotification('Error: ' + data.message, 'error');
-}
-
-function handleNewRideRequest(data) {
-    console.log('New ride request:', data);
-    showNotification('🚖 New ride from ' + data.customerName, 'info');
-}
-
-function handleRideAcceptedByRider(data) {
-    console.log('Ride accepted by rider:', data);
-    showNotification('✅ Ride accepted by ' + data.riderName, 'success');
-}
-
-function handleRideCompletedAdmin(data) {
-    console.log('Ride completed:', data);
-    showNotification('🏁 Ride completed: $' + data.fare, 'success');
-}
-
-function handleNewComplaint(data) {
-    console.log('New complaint:', data);
-    showNotification('📝 New complaint from ' + data.userName, 'warning');
-    playNotificationSound();
-}
-
-// ==================== HELPER FUNCTIONS ====================
-function updateAdminStatus(status) {
-    const statusElement = document.getElementById('adminConnectionStatus');
-    if (statusElement) {
-        statusElement.textContent = status;
-        statusElement.style.color = status.includes('🟢') ? '#4CAF50' : '#f44336';
-    }
-}
-
-function showNotification(message, type = 'info') {
-    // Create notification
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : type === 'warning' ? '#FF9800' : '#2196F3'};
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-        max-width: 300px;
-    `;
-    notification.innerHTML = `
-        <strong>${type.toUpperCase()}</strong><br>
-        ${message}
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
-}
-
-function playNotificationSound() {
-    try {
-        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
-        audio.volume = 0.3;
-        audio.play();
-    } catch (error) {
-        console.log('Sound play failed:', error);
-    }
-}
-
-// ==================== INITIALIZE ====================
-document.addEventListener('DOMContentLoaded', function() {
-    initializeAdminSocket();
-    
-    // Check if admin already logged in
-    const adminData = localStorage.getItem('adminData');
-    if (adminData) {
-        currentAdmin = JSON.parse(adminData);
-        // Auto-login
-        socket.emit('admin_login', {
-            username: currentAdmin.username,
-            password: localStorage.getItem('adminPassword') || 'admin123'
+        allRides.forEach(ride => {
+            const row = document.createElement('tr');
+            const statusClass = `status-${ride.status}`;
+            
+            row.innerHTML = `
+                <td>${ride.id.substring(0, 8)}...</td>
+                <td>${ride.customerName}</td>
+                <td>${ride.pickup}</td>
+                <td>${ride.dropoff}</td>
+                <td>$${ride.fare}</td>
+                <td><span class="status-badge ${statusClass}">${ride.status}</span></td>
+                <td>${ride.acceptedRiderName || '-'}</td>
+                <td>${new Date(ride.createdAt).toLocaleTimeString()}</td>
+            `;
+            tbody.appendChild(row);
         });
     }
-});
+
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.innerHTML = `
+            <i class="fas fa-bell"></i>
+            <span>${message}</span>
+            <i class="fas fa-times close-notification"></i>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-green);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        notification.querySelector('.close-notification').addEventListener('click', () => {
+            notification.remove();
+        });
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Initialize admin
+    document.addEventListener('DOMContentLoaded', function() {
+        // Login for admin
+        document.getElementById('admin-login-btn').addEventListener('click', function() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            
+            // Simple admin credentials (change in production)
+            if (username === 'admin' && password === 'admin123') {
+                document.getElementById('admin-login-screen').style.display = 'none';
+                document.getElementById('admin-dashboard-screen').style.display = 'block';
+                socket.emit('admin-connect');
+                socket.emit('get-active-rides', 'admin');
+            } else {
+                alert('Invalid admin credentials');
+            }
+        });
+    });
 </script>
 </body>
 </html>
