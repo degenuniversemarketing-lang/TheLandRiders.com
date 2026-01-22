@@ -3054,338 +3054,360 @@ const BACKEND_URL = 'https://bykea-testing-production.up.railway.app';
     <!-- Add this RIGHT BEFORE </body> -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-// ==================== BACKEND CONFIGURATION ====================
-const BACKEND_URL = 'https://bykea-testing-production.up.railway.app';
-let socket = null;
-let currentUser = null;
+    // Socket connection
+    const socket = io('http://localhost:3000');
+    
+    // User state
+    let currentUser = null;
+    let activeRideId = null;
+    let rideOffers = [];
 
-// ==================== INITIALIZE CONNECTION ====================
-function initializeSocket() {
-    console.log('🔗 Connecting to backend:', BACKEND_URL);
-    
-    socket = io(BACKEND_URL, {
-        transports: ['websocket', 'polling'],
-        reconnection: true,
-        reconnectionAttempts: 5
-    });
-    
-    // Connection events
+    // Screen management
+    const screens = {
+        selection: 'selection-screen',
+        customerAuth: 'customer-auth',
+        riderAuth: 'rider-auth',
+        customerDashboard: 'customer-dashboard',
+        riderDashboard: 'rider-dashboard',
+        customerRegistration: 'customer-registration',
+        riderRegistration: 'rider-registration'
+    };
+
+    let currentScreen = screens.selection;
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.style.display = 'none';
+        });
+        
+        const screenToShow = document.getElementById(screenId);
+        if (screenToShow) {
+            screenToShow.style.display = 'block';
+            currentScreen = screenId;
+        }
+        
+        updateHeader(screenId);
+    }
+
+    // Initialize Socket Events
     socket.on('connect', () => {
-        console.log('✅✅✅ CONNECTED to backend! Socket ID:', socket.id);
-        updateConnectionStatus('🟢 Connected');
-        
-        // Auto-login if saved
-        const savedRider = localStorage.getItem('riderData');
-        const savedCustomer = localStorage.getItem('customerData');
-        
-        if (savedRider) {
-            const riderData = JSON.parse(savedRider);
-            riderLogin(riderData.riderId, localStorage.getItem('riderPassword'));
-        } else if (savedCustomer) {
-            const customerData = JSON.parse(savedCustomer);
-            customerLogin(customerData.phone, localStorage.getItem('customerPassword'));
+        console.log('Connected to server with ID:', socket.id);
+    });
+
+    // Customer receives new offers
+    socket.on('new-offer', (data) => {
+        if (data.rideId === activeRideId) {
+            rideOffers.push(data.offer);
+            displayOffers();
         }
     });
-    
-    socket.on('disconnect', () => {
-        console.log('❌ Disconnected from backend');
-        updateConnectionStatus('🔴 Disconnected');
-    });
-    
-    socket.on('connected', (data) => {
-        console.log('Server welcome:', data.message);
-    });
-    
-    socket.on('connect_error', (error) => {
-        console.error('❌ Connection error:', error.message);
-        updateConnectionStatus('🔴 Connection Failed');
-    });
-    
-    // ==================== CUSTOMER EVENTS ====================
-    socket.on('register_success', handleRegisterSuccess);
-    socket.on('login_success', handleLoginSuccess);
-    socket.on('login_error', handleLoginError);
-    socket.on('ride_requested', handleRideRequested);
-    socket.on('ride_accepted', handleRideAccepted);
-    socket.on('ride_completed', handleRideCompleted);
-    socket.on('ride_error', handleRideError);
-    
-    // ==================== RIDER EVENTS ====================
-    socket.on('rider_login_success', handleRiderLoginSuccess);
-    socket.on('new_ride_request', handleNewRideRequest);
-    socket.on('ride_confirmed', handleRideConfirmed);
-    socket.on('ride_completed_rider', handleRideCompletedRider);
-    socket.on('ride_taken', handleRideTaken);
-}
 
-// ==================== CUSTOMER FUNCTIONS ====================
-function customerRegister(name, phone, password, email = '') {
-    if (!socket || !socket.connected) {
-        showNotification('Please wait for connection...', 'error');
-        return false;
-    }
-    
-    socket.emit('customer_register', {
-        name: name,
-        phone: phone,
-        password: password,
-        email: email
+    // Customer ride confirmed
+    socket.on('offer-accepted', (data) => {
+        showStatusMessage(`✅ Ride confirmed with ${data.riderName}! Price: $${data.price}`, 'success');
+        document.getElementById('offers-section').style.display = 'none';
+        document.getElementById('ride-status').innerHTML = `
+            <div class="status-message status-success">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Ride Confirmed!</strong><br>
+                    Rider: ${data.riderName}<br>
+                    Price: $${data.price}<br>
+                    <small>Your rider is on the way</small>
+                </div>
+            </div>
+        `;
     });
-    
-    localStorage.setItem('customerPassword', password);
-    return true;
-}
 
-function customerLogin(phone, password) {
-    if (!socket || !socket.connected) {
-        showNotification('Please wait for connection...', 'error');
-        return false;
-    }
-    
-    socket.emit('customer_login', {
-        phone: phone,
-        password: password
+    // Rider sees new ride requests
+    socket.on('new-ride-available', (ride) => {
+        if (currentScreen === screens.riderDashboard) {
+            displayAvailableRide(ride);
+        }
     });
-    
-    localStorage.setItem('customerPassword', password);
-    return true;
-}
 
-function requestRide(pickup, destination, fare = 'To be determined', notes = '') {
-    if (!socket || !socket.connected) {
-        showNotification('Please wait for connection...', 'error');
-        return false;
-    }
-    
-    if (!currentUser || currentUser.type !== 'customer') {
-        showNotification('Please login as customer first', 'error');
-        return false;
-    }
-    
-    socket.emit('request_ride', {
-        pickup: pickup,
-        destination: destination,
-        fare: fare,
-        notes: notes,
-        customerName: currentUser.name,
-        customerId: currentUser.phone || currentUser.customerId
+    // Rider gets notified when they win a ride
+    socket.on('offer-won', (data) => {
+        showStatusMessage(`🎉 You got the ride from ${data.customerName}!`, 'success');
+        document.getElementById('available-rides').innerHTML = `
+            <div class="offer-card">
+                <div class="offer-header">
+                    <span class="rider-name">Active Ride</span>
+                    <span class="offer-price">$${data.price}</span>
+                </div>
+                <div class="offer-details">
+                    <div class="detail-item">
+                        <i class="fas fa-user detail-icon"></i>
+                        <span>Customer: ${data.customerName}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-map-marker-alt detail-icon"></i>
+                        <span>Pickup: ${data.pickup}</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-yellow btn-small" onclick="updateRideStatus('picked_up')">
+                        <i class="fas fa-user-check"></i> Picked Up
+                    </button>
+                    <button class="btn btn-secondary btn-small" onclick="showCustomerInfo()">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+        `;
     });
-    
-    return true;
-}
 
-// ==================== RIDER FUNCTIONS ====================
-function riderLogin(riderId, password) {
-    if (!socket || !socket.connected) {
-        showNotification('Please wait for connection...', 'error');
-        return false;
-    }
-    
-    socket.emit('rider_login', {
-        riderId: riderId,
-        password: password
+    // Rider sees when ride is taken by someone else
+    socket.on('ride-taken', (data) => {
+        const rideElement = document.querySelector(`[data-ride-id="${data.rideId}"]`);
+        if (rideElement) {
+            rideElement.remove();
+            showStatusMessage('Ride has been taken by another rider', 'warning');
+        }
     });
-    
-    localStorage.setItem('riderPassword', password);
-    return true;
-}
 
-function updateRiderStatus(status) {
-    if (!socket || !socket.connected) {
-        showNotification('Please wait for connection...', 'error');
-        return false;
-    }
-    
-    if (!currentUser || currentUser.type !== 'rider') {
-        showNotification('Please login as rider first', 'error');
-        return false;
-    }
-    
-    socket.emit('rider_status_update', {
-        status: status
-    });
-    
-    return true;
-}
-
-function acceptRide(rideId) {
-    if (!socket || !socket.connected) {
-        showNotification('Please wait for connection...', 'error');
-        return false;
-    }
-    
-    socket.emit('accept_ride', {
-        rideId: rideId
-    });
-    
-    return true;
-}
-
-function completeRide(rideId, fare) {
-    if (!socket || !socket.connected) {
-        showNotification('Please wait for connection...', 'error');
-        return false;
-    }
-    
-    socket.emit('complete_ride', {
-        rideId: rideId,
-        fare: fare
-    });
-    
-    return true;
-}
-
-// ==================== EVENT HANDLERS ====================
-function handleRegisterSuccess(data) {
-    console.log('Registration success:', data);
-    showNotification('Registration successful!', 'success');
-    
-    if (data.customer) {
-        currentUser = {
-            type: 'customer',
-            ...data.customer
+    // Ride status updates for both parties
+    socket.on('ride-status-updated', (data) => {
+        const statusMessages = {
+            'picked_up': '🚗 Rider has picked you up!',
+            'completed': '✅ Ride completed! Thank you for choosing us.',
+            'cancelled': '❌ Ride was cancelled'
         };
-        localStorage.setItem('customerData', JSON.stringify(data.customer));
-        showCustomerDashboard(data);
-    }
-}
+        
+        if (statusMessages[data.status]) {
+            showStatusMessage(statusMessages[data.status], 
+                data.status === 'cancelled' ? 'error' : 'success');
+        }
+    });
 
-function handleLoginSuccess(data) {
-    console.log('Login success:', data);
-    
-    if (data.customer) {
-        currentUser = {
-            type: 'customer',
-            ...data.customer
+    // Customer Functions
+    function requestRide() {
+        const pickup = document.getElementById('pickup-location').value;
+        const dropoff = document.getElementById('dropoff-location').value;
+        
+        if (!pickup || !dropoff) {
+            showStatusMessage('Please enter both pickup and dropoff locations', 'error');
+            return;
+        }
+        
+        const fare = Math.floor(Math.random() * 30) + 10; // Random fare $10-$40
+        
+        const rideData = {
+            pickup,
+            dropoff,
+            fare,
+            customerName: currentUser.name
         };
-        localStorage.setItem('customerData', JSON.stringify(data.customer));
-        showCustomerDashboard(data);
+        
+        socket.emit('request-ride', rideData);
+        
+        // Show loading state
+        showStatusMessage('🔄 Finding available riders...', 'info');
+        document.getElementById('offers-section').style.display = 'none';
+        rideOffers = [];
     }
-}
 
-function handleRiderLoginSuccess(data) {
-    console.log('Rider login success:', data);
-    
-    if (data.rider) {
-        currentUser = {
-            type: 'rider',
-            ...data.rider
-        };
-        localStorage.setItem('riderData', JSON.stringify(data.rider));
-        showRiderDashboard(data);
+    // Customer receives ride confirmation
+    socket.on('ride-requested', (data) => {
+        if (data.success) {
+            activeRideId = data.rideId;
+            showStatusMessage('Ride requested! Waiting for rider offers...', 'success');
+            
+            // Request active rides
+            socket.emit('get-active-rides', 'customer');
+        }
+    });
+
+    // Rider Functions
+    function riderLogin() {
+        const name = document.getElementById('rider-name').value;
+        const vehicleType = document.getElementById('vehicle-type').value;
+        const licensePlate = document.getElementById('license-plate').value;
+        
+        if (!name || !vehicleType || !licensePlate) {
+            showStatusMessage('Please fill all fields', 'error');
+            return;
+        }
+        
+        currentUser = { name, type: 'rider' };
+        socket.emit('rider-connect', {
+            name,
+            vehicleType,
+            licensePlate,
+            status: 'online'
+        });
+        
+        showScreen(screens.riderDashboard);
+        showStatusMessage(`Welcome, ${name}! You're now online`, 'success');
+        
+        // Get available rides
+        socket.emit('get-active-rides', 'rider');
     }
-}
 
-function handleLoginError(data) {
-    console.error('Login error:', data);
-    showNotification('Login failed: ' + data.message, 'error');
-}
-
-function handleRideRequested(data) {
-    console.log('Ride requested:', data);
-    showNotification('Ride request sent! ' + data.message, 'success');
-}
-
-function handleRideAccepted(data) {
-    console.log('Ride accepted:', data);
-    showNotification('Ride accepted by ' + data.riderName, 'success');
-}
-
-function handleRideCompleted(data) {
-    console.log('Ride completed:', data);
-    showNotification('Ride completed! Thank you!', 'success');
-}
-
-function handleRideError(data) {
-    console.error('Ride error:', data);
-    showNotification('Ride error: ' + data.message, 'error');
-}
-
-function handleNewRideRequest(data) {
-    console.log('New ride request:', data);
-    showNotification('🚨 New ride request from ' + data.customerName, 'info');
-    playNotificationSound();
-}
-
-function handleRideConfirmed(data) {
-    console.log('Ride confirmed:', data);
-    showNotification('Ride confirmed! Customer: ' + data.customerName, 'success');
-}
-
-function handleRideCompletedRider(data) {
-    console.log('Ride completed (rider):', data);
-    showNotification('Ride completed! Earnings: $' + data.earnings, 'success');
-}
-
-function handleRideTaken(data) {
-    console.log('Ride taken by someone else:', data);
-    showNotification('Ride was taken by another rider', 'info');
-}
-
-// ==================== HELPER FUNCTIONS ====================
-function updateConnectionStatus(status) {
-    const statusElement = document.getElementById('connectionStatus');
-    if (statusElement) {
-        statusElement.textContent = status;
-        statusElement.style.color = status.includes('🟢') ? '#4CAF50' : '#f44336';
+    function makeOffer(rideId) {
+        const price = document.getElementById(`offer-price-${rideId}`).value;
+        const eta = document.getElementById(`offer-eta-${rideId}`).value;
+        
+        if (!price || !eta) {
+            showStatusMessage('Please enter both price and ETA', 'error');
+            return;
+        }
+        
+        socket.emit('make-offer', {
+            rideId,
+            price: parseFloat(price),
+            eta: parseInt(eta)
+        });
+        
+        showStatusMessage('Offer sent! Waiting for customer response...', 'success');
     }
-}
 
-function showNotification(message, type = 'info') {
-    // Create notification
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-        max-width: 300px;
-    `;
-    notification.innerHTML = `
-        <strong>${type.toUpperCase()}</strong><br>
-        ${message}
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
-}
-
-function playNotificationSound() {
-    try {
-        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
-        audio.volume = 0.3;
-        audio.play();
-    } catch (error) {
-        console.log('Sound play failed:', error);
+    // Customer accepts an offer
+    function acceptOffer(riderId, riderName, price) {
+        socket.emit('accept-offer', {
+            rideId: activeRideId,
+            riderId,
+            riderName,
+            price
+        });
     }
-}
 
-// ==================== INITIALIZE ====================
-document.addEventListener('DOMContentLoaded', function() {
-    initializeSocket();
-    
-    // Check existing login
-    const riderData = localStorage.getItem('riderData');
-    const customerData = localStorage.getItem('customerData');
-    
-    if (riderData) {
-        currentUser = JSON.parse(riderData);
-        currentUser.type = 'rider';
-        showRiderDashboard({ rider: currentUser });
-    } else if (customerData) {
-        currentUser = JSON.parse(customerData);
-        currentUser.type = 'customer';
-        showCustomerDashboard({ customer: currentUser });
+    // Display functions
+    function displayOffers() {
+        const offersContainer = document.getElementById('offers-list');
+        offersContainer.innerHTML = '';
+        
+        rideOffers.forEach((offer, index) => {
+            const offerElement = document.createElement('div');
+            offerElement.className = 'offer-card';
+            offerElement.innerHTML = `
+                <div class="offer-header">
+                    <span class="rider-name">${offer.riderName}</span>
+                    <span class="offer-price">$${offer.price}</span>
+                </div>
+                <div class="offer-details">
+                    <div class="detail-item">
+                        <i class="fas fa-car detail-icon"></i>
+                        <span>${offer.vehicleType}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-clock detail-icon"></i>
+                        <span>ETA: ${offer.eta} mins</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-id-card detail-icon"></i>
+                        <span>Plate: ${offer.licensePlate}</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-yellow btn-small" onclick="acceptOffer('${offer.riderId}', '${offer.riderName}', ${offer.price})">
+                        <i class="fas fa-check"></i> Accept $${offer.price}
+                    </button>
+                    <button class="btn btn-secondary btn-small" onclick="showRiderInfo(${index})">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            `;
+            offersContainer.appendChild(offerElement);
+        });
+        
+        if (rideOffers.length > 0) {
+            document.getElementById('offers-section').style.display = 'block';
+            showStatusMessage(`Found ${rideOffers.length} rider(s) available!`, 'success');
+        }
     }
-});
+
+    function displayAvailableRide(ride) {
+        const ridesContainer = document.getElementById('available-rides');
+        
+        // Check if ride already exists
+        if (document.querySelector(`[data-ride-id="${ride.id}"]`)) return;
+        
+        const rideElement = document.createElement('div');
+        rideElement.className = 'offer-card';
+        rideElement.setAttribute('data-ride-id', ride.id);
+        rideElement.innerHTML = `
+            <div class="offer-header">
+                <span class="rider-name">${ride.customerName}</span>
+                <span class="offer-price">$${ride.fare}</span>
+            </div>
+            <div class="offer-details">
+                <div class="detail-item">
+                    <i class="fas fa-map-marker-alt detail-icon"></i>
+                    <span>From: ${ride.pickup}</span>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-flag-checkered detail-icon"></i>
+                    <span>To: ${ride.dropoff}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Your Price ($):</label>
+                <input type="number" id="offer-price-${ride.id}" class="form-input" placeholder="e.g., 25" min="${ride.fare - 5}" max="${ride.fare + 10}" value="${ride.fare}">
+            </div>
+            <div class="form-group">
+                <label>Your ETA (minutes):</label>
+                <input type="number" id="offer-eta-${ride.id}" class="form-input" placeholder="e.g., 10" min="5" max="30" value="10">
+            </div>
+            <button class="btn btn-yellow" onclick="makeOffer('${ride.id}')">
+                <i class="fas fa-paper-plane"></i> Send Offer
+            </button>
+        `;
+        
+        ridesContainer.appendChild(rideElement);
+    }
+
+    // Utility functions
+    function showStatusMessage(message, type) {
+        const statusDiv = document.getElementById('status-message');
+        statusDiv.className = `status-message status-${type}`;
+        statusDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
+        statusDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        showScreen(screens.selection);
+        
+        // Set up event listeners
+        document.getElementById('customer-app').addEventListener('click', function(e) {
+            e.preventDefault();
+            showScreen(screens.customerAuth);
+        });
+        
+        document.getElementById('rider-app').addEventListener('click', function(e) {
+            e.preventDefault();
+            showScreen(screens.riderAuth);
+        });
+        
+        // Customer login
+        document.getElementById('customer-login-btn').addEventListener('click', function() {
+            const name = document.getElementById('customer-name').value;
+            if (!name) {
+                showStatusMessage('Please enter your name', 'error');
+                return;
+            }
+            currentUser = { name, type: 'customer' };
+            socket.emit('customer-connect', { name });
+            showScreen(screens.customerDashboard);
+        });
+        
+        // Rider login
+        document.getElementById('rider-login-btn').addEventListener('click', riderLogin);
+        
+        // Back button
+        document.querySelector('.back-btn').addEventListener('click', function() {
+            if (currentScreen === screens.customerAuth || currentScreen === screens.riderAuth) {
+                showScreen(screens.selection);
+            } else if (currentScreen === screens.customerDashboard || currentScreen === screens.riderDashboard) {
+                showScreen(currentScreen.includes('customer') ? screens.customerAuth : screens.riderAuth);
+            }
+        });
+    });
 </script>
 </body>
 </html>
